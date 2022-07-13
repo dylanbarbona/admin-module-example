@@ -17,6 +17,7 @@ import { AuthResolver } from "./application/resolvers/auth.resolver";
 import { TokenService } from "./application/services/token.service";
 import { AuthService } from "./application/services/auth.service";
 
+import { PrismaOAuthRefreshTokenRepository } from "./infrastructure/repositories/prisma-oauth_refresh_token.repository";
 import { PrismaOAuthAccessTokenRepository } from "./infrastructure/repositories/prisma-oauth_access_token.repository";
 import { PrismaOAuthClientRepository } from "./infrastructure/repositories/prisma-oauth_client.repository";
 import { PrismaAuthRepository } from "./infrastructure/repositories/prisma-auth.repository";
@@ -87,6 +88,10 @@ import * as fs from "fs";
         {
             provide: 'OAuthAccessTokenRepository',
             useClass: PrismaOAuthAccessTokenRepository
+        },
+        {
+            provide: 'OAuthRefreshTokenRepository',
+            useClass: PrismaOAuthRefreshTokenRepository
         }
     ],
     exports: [

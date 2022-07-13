@@ -1,7 +1,7 @@
 import {  Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../../database/prisma.service";
 import { OAuthAccessTokenRepository } from "../../domain/contracts/oauth_access_token.repository";
-import {OAuthAccessTokenEntity} from "../../domain/entities/OAuthAccessToken.entity";
+import { OAuthAccessTokenEntity } from "../../domain/entities/OAuthAccessToken.entity";
 
 @Injectable()
 export class PrismaOAuthAccessTokenRepository implements OAuthAccessTokenRepository {
@@ -23,6 +23,6 @@ export class PrismaOAuthAccessTokenRepository implements OAuthAccessTokenReposit
     }
 
     async create(data: OAuthAccessTokenEntity) {
-        return await this.prisma.oauth_access_tokens.create({data});
+        return await this.prisma.oauth_access_tokens.create({ data });
     }
 }

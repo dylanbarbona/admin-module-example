@@ -1,4 +1,3 @@
 export interface OAuthClientRepository {
-    findOne(personal_access_client: boolean)
-
+    findOne(data: { personal_access_token: boolean, password_client: boolean, revoked: boolean })
 }

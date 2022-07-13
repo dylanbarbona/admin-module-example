@@ -28,9 +28,10 @@ export class LoginHandler implements IQueryHandler<LoginQuery> {
         if(!isAuthenticated)
             throw new HttpException('Correo electrónico o contraseña inválidos', HttpStatus.UNAUTHORIZED);
 
-        const token = await this.tokenService.generateJWTToken(user.id);
+        const { accessToken, refreshToken } = await this.tokenService.generateJWTToken(user.id);
         return {
-            access_token: token,
+            access_token: accessToken,
+            refresh_token: refreshToken,
             token_type: 'Bearer',
             expires_at: this.tokenService.getDateOneYearFromNow(),
             user_id: Number(user.id)

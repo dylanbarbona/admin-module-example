@@ -16,9 +16,10 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     async execute(command: RegisterCommand) {
         const password = bcrypt.hashSync(command.password, Number(process.env.HASH_SALT))
         const user = await this.repository.create(command.first_name, command.last_name, command.email, password)
-        const token = await this.tokenService.generateJWTToken(user.id);
+        const { accessToken, refreshToken } = await this.tokenService.generateJWTToken(user.id);
         return {
-            access_token: token,
+            access_token: accessToken,
+            refresh_token: refreshToken,
             token_type: 'Bearer',
             expires_at: this.tokenService.getDateOneYearFromNow(),
             user_id: Number(user.id)

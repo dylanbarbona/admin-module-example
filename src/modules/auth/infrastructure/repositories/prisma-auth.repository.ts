@@ -7,9 +7,7 @@ import { PrismaService } from "../../../../database/prisma.service";
 
 @Injectable()
 export class PrismaAuthRepository implements AuthRepository {
-    constructor(
-        private prisma: PrismaService,
-        private configService: ConfigService) {}
+    constructor(private prisma: PrismaService) {}
 
     public async findOne(email: string): Promise<User> {
         let user = await this.prisma.users.findFirst({ where: { email }})
