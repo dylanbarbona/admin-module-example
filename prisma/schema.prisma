@@ -1,0 +1,2621 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model administrative_divisions {
+  id                             Int                        @id @default(autoincrement())
+  code                           String                     @db.VarChar(20)
+  name                           String                     @db.VarChar(100)
+  country_id                     Int?
+  country_code                   String                     @db.Char(2)
+  parent_id                      Int?
+  level                          Int?                       @db.UnsignedTinyInt
+  created_at                     DateTime                   @default(now()) @db.Timestamp(0)
+  updated_at                     DateTime?                  @db.Timestamp(0)
+  countries                      countries?                 @relation(fields: [country_id], references: [id], onDelete: Restrict, map: "administrative_divisions_country_id_foreign")
+  administrative_divisions       administrative_divisions?  @relation("administrative_divisionsToadministrative_divisions_parent_id", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "administrative_divisions_parent_id_foreign")
+  other_administrative_divisions administrative_divisions[] @relation("administrative_divisionsToadministrative_divisions_parent_id")
+
+  @@unique([country_id, level, code], map: "administrative_divisions_code_unique")
+  @@index([parent_id], map: "administrative_divisions_parent_id_foreign")
+}
+
+model ambients {
+  id             Int              @id @default(autoincrement())
+  code           String           @db.VarChar(255)
+  name           String?          @db.VarChar(255)
+  title          String?          @db.VarChar(255)
+  subtitle       String?          @db.VarChar(255)
+  description    String?          @db.VarChar(255)
+  background     String           @db.Text
+  keywords       String?          @db.Text
+  active         Boolean          @default(true)
+  sponsor_id     Int?
+  created_at     DateTime?        @db.Timestamp(0)
+  updated_at     DateTime?        @db.Timestamp(0)
+  ambients_items ambients_items[]
+}
+
+model ambients_items {
+  id                Int                 @id @default(autoincrement())
+  ambient_id        Int
+  type              String              @db.VarChar(255)
+  x                 Float
+  y                 Float
+  code              String?             @db.VarChar(255)
+  reference         String?             @db.VarChar(255)
+  name              String?             @db.VarChar(255)
+  description       String?             @db.VarChar(255)
+  image             String              @db.Text
+  query             String?             @db.VarChar(255)
+  filters           String?             @db.VarChar(255)
+  active            Boolean             @default(true)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  x_mobile          Float
+  y_mobile          Float
+  image_mobile      String              @db.Text
+  ambients          ambients            @relation(fields: [ambient_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ambients_items_ambient_id_foreign")
+  ambients_subitems ambients_subitems[]
+
+  @@index([ambient_id], map: "ambients_items_ambient_id_foreign")
+}
+
+model ambients_subitems {
+  id              Int             @id @default(autoincrement())
+  ambient_item_id Int?
+  code            String?         @db.VarChar(255)
+  reference       String?         @db.VarChar(255)
+  name            String?         @db.VarChar(255)
+  description     String?         @db.VarChar(255)
+  query           String?         @db.VarChar(255)
+  filters         String?         @db.VarChar(255)
+  active          Boolean         @default(true)
+  created_at      DateTime?       @db.Timestamp(0)
+  updated_at      DateTime?       @db.Timestamp(0)
+  parent          Int?
+  ambients_items  ambients_items? @relation(fields: [ambient_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ambients_subitems_ambient_item_id_foreign")
+
+  @@index([ambient_item_id], map: "ambients_subitems_ambient_item_id_foreign")
+}
+
+model applications {
+  id         Int       @id @default(autoincrement())
+  key        String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model authorizations {
+  id         Int       @id @default(autoincrement())
+  action     String    @unique(map: "authorizations_action_unique") @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  system     String    @db.VarChar(255)
+  type       String    @db.VarChar(255)
+  route_name String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model banners_categories {
+  id          String     @id @db.Char(36)
+  name        String?    @db.VarChar(255)
+  img         String     @db.VarChar(255)
+  category_id Int
+  active      Boolean    @default(true)
+  created_at  DateTime   @default(now()) @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  categories  categories @relation(fields: [category_id], references: [id], map: "banners_categories_category_id_foreign")
+
+  @@index([category_id], map: "banners_categories_category_id_foreign")
+}
+
+model banners_main {
+  id         String    @id @db.Char(36)
+  name       String    @db.VarChar(255)
+  size       String    @db.VarChar(255)
+  icon       String    @db.VarChar(255)
+  bg         String    @db.VarChar(255)
+  color      String    @db.VarChar(255)
+  link       String?   @db.VarChar(255)
+  active     Boolean   @default(true)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model banners_merchants {
+  id          String    @id @db.Char(36)
+  name        String?   @db.VarChar(255)
+  img         String?   @db.VarChar(255)
+  merchant_id Int
+  active      Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  merchants   merchants @relation(fields: [merchant_id], references: [id], map: "banners_merchants_merchant_id_foreign")
+
+  @@index([merchant_id], map: "banners_merchants_merchant_id_foreign")
+}
+
+model banners_products {
+  id         String    @id @db.Char(36)
+  product_id Int
+  dark       Boolean   @default(true)
+  active     Boolean   @default(true)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  products   products  @relation(fields: [product_id], references: [id], map: "banners_products_product_id_foreign")
+
+  @@index([product_id], map: "banners_products_product_id_foreign")
+}
+
+model banners_slides {
+  id         String    @id @db.Char(36)
+  img        String    @db.VarChar(255)
+  link       String?   @db.VarChar(255)
+  linkType   String?   @db.VarChar(255)
+  active     Boolean   @default(true)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model billings {
+  id                        Int       @id @default(autoincrement())
+  user_id                   Int       @unique(map: "billings_user_id_unique")
+  billing_name              String    @db.VarChar(255)
+  contact_email             String    @db.VarChar(255)
+  place_id                  String    @db.VarChar(255)
+  address_route             String    @db.VarChar(255)
+  address_street_number     String    @db.VarChar(255)
+  address_extra             String?   @db.VarChar(255)
+  contact_phone_number      String    @db.VarChar(255)
+  identification_number     String    @db.VarChar(255)
+  invoice_require_factura_a Boolean   @default(false)
+  created_at                DateTime? @db.Timestamp(0)
+  updated_at                DateTime? @db.Timestamp(0)
+  deleted_at                DateTime? @db.Timestamp(0)
+  users                     users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "billings_user_id_foreign")
+}
+
+model bol_combo_merchant {
+  bol_id            Int
+  combo_merchant_id Int
+  quantity          Int
+  original_quantity Int
+  created_at        DateTime?       @db.Timestamp(0)
+  updated_at        DateTime?       @db.Timestamp(0)
+  bols              bols            @relation(fields: [bol_id], references: [id], onDelete: Cascade, map: "bol_combo_merchant_bol_id_foreign")
+  combo_merchants   combo_merchants @relation(fields: [combo_merchant_id], references: [id], map: "bol_combo_merchant_combo_merchant_id_foreign")
+
+  @@id([bol_id, combo_merchant_id])
+  @@index([combo_merchant_id], map: "bol_combo_merchant_combo_merchant_id_foreign")
+}
+
+model bol_merchant_product {
+  bol_id              Int
+  merchant_product_id Int
+  quantity            Int
+  original_quantity   Int
+  created_at          DateTime?          @db.Timestamp(0)
+  updated_at          DateTime?          @db.Timestamp(0)
+  bols                bols               @relation(fields: [bol_id], references: [id], onDelete: Cascade, map: "bol_merchant_product_bol_id_foreign")
+  merchants_products  merchants_products @relation(fields: [merchant_product_id], references: [id], map: "bol_merchant_product_merchant_product_id_foreign")
+
+  @@id([bol_id, merchant_product_id])
+  @@index([merchant_product_id], map: "bol_merchant_product_merchant_product_id_foreign")
+}
+
+model bol_status {
+  bol_id                       Int?
+  deliver_place_photo          String?                    @db.VarChar(255)
+  physical_bol_photo           String?                    @db.VarChar(255)
+  created_at                   DateTime                   @default(now()) @db.Timestamp(6)
+  updated_at                   DateTime                   @default(now()) @db.Timestamp(6)
+  id                           Int                        @id @default(autoincrement()) @db.UnsignedInt
+  comments                     String?                    @db.VarChar(255)
+  lat                          String?                    @db.VarChar(255)
+  long                         String?                    @db.VarChar(255)
+  created_in_app_at            String?                    @db.VarChar(255)
+  delivery_rejection_reason_id Int?                       @db.UnsignedInt
+  bol_status_id                Int?                       @db.UnsignedInt
+  bols                         bols?                      @relation(fields: [bol_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_d88abe9061eb176e83fe43f38d1")
+  status_for_bols              status_for_bols?           @relation(fields: [bol_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_2634ef707c31dd5610eb5779ec1")
+  delivery_rejection_reason    delivery_rejection_reason? @relation(fields: [delivery_rejection_reason_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e84f68c77d53ea9f9c3ec88b47e")
+
+  @@index([bol_status_id], map: "FK_2634ef707c31dd5610eb5779ec1")
+  @@index([bol_id], map: "FK_d88abe9061eb176e83fe43f38d1")
+  @@index([delivery_rejection_reason_id], map: "FK_e84f68c77d53ea9f9c3ec88b47e")
+}
+
+model bols {
+  id                   Int                    @id @default(autoincrement())
+  order_id             Int
+  taken                Int                    @db.TinyInt
+  qr_code              String?                @db.Text
+  identifier           String?                @db.VarChar(255)
+  created_at           DateTime               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime               @default(now()) @db.Timestamp(6)
+  receiper             String?                @db.VarChar(80)
+  receiper_dni         String?                @db.VarChar(255)
+  vehicle_entity       String?                @db.VarChar(50)
+  vehicle_domain       String?                @db.VarChar(10)
+  vehicle_photo        String?                @db.VarChar(255)
+  destination          String?                @db.VarChar(80)
+  delivery_app_id      Int?                   @db.UnsignedInt
+  delivery_apps        delivery_apps?         @relation(fields: [delivery_app_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_c116858d7a56033fba6771d0aba")
+  bol_combo_merchant   bol_combo_merchant[]
+  bol_merchant_product bol_merchant_product[]
+  bol_status           bol_status[]
+
+  @@index([delivery_app_id], map: "FK_c116858d7a56033fba6771d0aba")
+}
+
+model brand_groups {
+  id           Int       @id @default(autoincrement())
+  brand_group  String    @db.VarChar(255)
+  url_carrusel String    @db.VarChar(255)
+  url_logo     String    @db.VarChar(255)
+  url_wide     String    @db.VarChar(255)
+  slogan       String    @db.VarChar(255)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model brand_place {
+  brand_id   Int
+  place_id   Int
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@ignore
+}
+
+model brand_users {
+  id       Int     @id @default(autoincrement())
+  user_id  Int?
+  brand_id Int?
+  brands   brands? @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "brand_users_brand_id_foreign")
+  users    users?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "brand_users_user_id_foreign")
+
+  @@index([brand_id], map: "brand_users_brand_id_foreign")
+  @@index([user_id], map: "brand_users_user_id_foreign")
+}
+
+model brands {
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @unique(map: "brands_name_unique") @db.VarChar(255)
+  created_at              DateTime?                 @db.Timestamp(0)
+  updated_at              DateTime?                 @db.Timestamp(0)
+  logo                    String?                   @db.LongText
+  color                   String?                   @db.Text
+  image                   String?                   @db.LongText
+  text1                   String?                   @db.Text
+  text2                   String?                   @db.Text
+  text3                   String?                   @db.Text
+  website                 String?                   @db.VarChar(255)
+  miniature               String?                   @db.VarChar(255)
+  brand_group_id          Int?
+  aliado                  Int?
+  brand_users             brand_users[]
+  brands_stock_thresholds brands_stock_thresholds[]
+  categories_to_brands    categories_to_brands[]
+}
+
+model brands_stock_thresholds {
+  id              Int       @id @default(autoincrement())
+  brand_id        Int?
+  lower_threshold Int       @default(1000) @db.UnsignedInt
+  upper_threshold Int       @default(2000) @db.UnsignedInt
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+  brands          brands?   @relation(fields: [brand_id], references: [id], onDelete: Cascade, map: "brands_stock_thresholds_brand_id_foreign")
+
+  @@index([brand_id], map: "brands_stock_thresholds_brand_id_foreign")
+}
+
+model campaigns {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.Text
+  quantity   Int       @default(1)
+  amount     Float?
+  active     Boolean   @default(true)
+  creator    Int?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model carts {
+  id          Int           @id @default(autoincrement())
+  user_id     Int
+  created_at  DateTime?     @db.Timestamp(0)
+  updated_at  DateTime?     @db.Timestamp(0)
+  users       users         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "carts_user_id_foreign")
+  carts_items carts_items[]
+
+  @@index([user_id], map: "carts_user_id_foreign")
+}
+
+model carts_items {
+  id            Int       @id @default(autoincrement())
+  cart_id       Int
+  itemable_type String    @db.VarChar(255)
+  itemable_id   Int
+  quantity      Int
+  total         Decimal   @db.Decimal(14, 4)
+  price         Decimal   @db.Decimal(14, 4)
+  offer_type    String?   @db.VarChar(255)
+  offer_value   Decimal?  @db.Decimal(14, 4)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  carts         carts     @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "carts_items_cart_id_foreign")
+
+  @@index([cart_id], map: "carts_items_cart_id_foreign")
+  @@index([itemable_type, itemable_id], map: "carts_items_itemable_type_itemable_id_index")
+}
+
+model categories {
+  id                          Int                           @id @default(autoincrement())
+  key                         String                        @db.VarChar(255)
+  name                        String                        @db.VarChar(255)
+  publication_type_categories String?                       @db.VarChar(255)
+  color                       Int?                          @db.TinyInt
+  parent_id                   Int?
+  template                    String?                       @db.Char(1)
+  family_id                   Int?
+  created_at                  DateTime?                     @db.Timestamp(0)
+  updated_at                  DateTime?                     @db.Timestamp(0)
+  deleted_at                  DateTime?                     @db.Timestamp(0)
+  category_families           category_families?            @relation(fields: [family_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "categories_family_id_foreign")
+  categories                  categories?                   @relation("categoriesTocategories_parent_id", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "categories_parent_id_foreign")
+  banners_categories          banners_categories[]
+  other_categories            categories[]                  @relation("categoriesTocategories_parent_id")
+  categories_extraFields      categories_extraFields[]
+  categories_to_brands        categories_to_brands[]
+  categories_to_manufacturers categories_to_manufacturers[]
+
+  @@index([family_id], map: "categories_family_id_foreign")
+  @@index([parent_id], map: "categories_parent_id_foreign")
+}
+
+model categories_extraFields {
+  name        String     @db.VarChar(255)
+  text        String     @db.VarChar(255)
+  type        String     @db.VarChar(255)
+  category_id Int
+  created_at  DateTime?  @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  categories  categories @relation(fields: [category_id], references: [id], onDelete: Cascade, map: "categories_extrafields_category_id_foreign")
+
+  @@id([name, category_id])
+  @@index([category_id], map: "categories_extrafields_category_id_foreign")
+}
+
+model categories_to_brands {
+  category_id Int
+  brand_id    Int
+  created_at  DateTime?  @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  brands      brands     @relation(fields: [brand_id], references: [id], map: "categories_to_brands_brand_id_foreign")
+  categories  categories @relation(fields: [category_id], references: [id], onDelete: Cascade, map: "categories_to_brands_category_id_foreign")
+
+  @@id([category_id, brand_id])
+  @@index([brand_id], map: "categories_to_brands_brand_id_foreign")
+}
+
+model categories_to_manufacturers {
+  category_id     Int
+  manufacturer_id Int
+  created_at      DateTime?     @db.Timestamp(0)
+  updated_at      DateTime?     @db.Timestamp(0)
+  categories      categories    @relation(fields: [category_id], references: [id], onDelete: Cascade, map: "categories_to_manufacturers_category_id_foreign")
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], map: "categories_to_manufacturers_manufacturer_id_foreign")
+
+  @@id([category_id, manufacturer_id])
+  @@index([manufacturer_id], map: "categories_to_manufacturers_manufacturer_id_foreign")
+}
+
+model category_families {
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(255)
+  description String?      @db.VarChar(255)
+  created_at  DateTime?    @db.Timestamp(0)
+  updated_at  DateTime?    @db.Timestamp(0)
+  categories  categories[]
+}
+
+model chat_messages {
+  id                    Int                 @id @default(autoincrement())
+  chat_room_id          Int?
+  sender_id             Int?
+  type_id               Int
+  content               String?             @db.Text
+  event_comment         String?             @db.Text
+  event_order_status_id Int?
+  event_text            String?             @db.Text
+  read                  Boolean
+  created_at            DateTime            @default(now()) @db.Timestamp(0)
+  updated_at            DateTime?           @db.Timestamp(0)
+  chat_rooms            chat_rooms?         @relation(fields: [chat_room_id], references: [id], onDelete: Restrict, map: "chat_messages_chat_room_id_foreign")
+  order_status          order_status?       @relation(fields: [event_order_status_id], references: [id], onDelete: Restrict, map: "chat_messages_event_order_status_id_foreign")
+  chat_messages_types   chat_messages_types @relation(fields: [type_id], references: [id], map: "chat_messages_type_id_foreign")
+
+  @@index([chat_room_id], map: "chat_messages_chat_room_id_foreign")
+  @@index([event_order_status_id], map: "chat_messages_event_order_status_id_foreign")
+  @@index([type_id], map: "chat_messages_type_id_foreign")
+}
+
+model chat_messages_event_images {
+  id         Int       @id @default(autoincrement())
+  img        String    @db.VarChar(255)
+  message_id Int
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([message_id], map: "chat_messages_event_images_message_id_foreign")
+}
+
+model chat_messages_types {
+  id            Int             @id @default(autoincrement())
+  description   String          @db.VarChar(255)
+  created_at    DateTime?       @db.Timestamp(0)
+  updated_at    DateTime?       @db.Timestamp(0)
+  chat_messages chat_messages[]
+}
+
+model chat_rooms {
+  id             Int             @id @default(autoincrement())
+  merchant_id    Int
+  user_id        Int
+  active         Boolean
+  unreadMerchant Int
+  unreadUser     Int
+  created_at     DateTime        @default(now()) @db.Timestamp(0)
+  updated_at     DateTime?       @db.Timestamp(0)
+  chat_messages  chat_messages[]
+
+  @@index([merchant_id], map: "chat_rooms_merchant_id_foreign")
+  @@index([user_id], map: "chat_rooms_user_id_foreign")
+}
+
+model combo_carts_items {
+  id                Int       @id @default(autoincrement())
+  combo_merchant_id Int
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model combo_merchant_free_shipping_zones {
+  combo_merchant_id Int
+  zone_id           Int
+  created_at        DateTime @db.Timestamp(0)
+
+  @@ignore
+}
+
+model combo_merchants {
+  id                 Int                  @id @default(autoincrement())
+  merchant_id        Int
+  combo_id           Int
+  status_id          Int
+  code               String               @db.VarChar(255)
+  stock              Int
+  price              Float
+  offer_type         String               @db.VarChar(255)
+  offer_value        Float
+  free_shipping      Boolean
+  created_at         DateTime?            @db.Timestamp(0)
+  updated_at         DateTime?            @db.Timestamp(0)
+  deleted_at         DateTime?            @db.Timestamp(0)
+  bol_combo_merchant bol_combo_merchant[]
+}
+
+model combo_order_items {
+  id                Int       @id @default(autoincrement())
+  combo_merchant_id Int
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model combo_product_carts_items {
+  id                        Int       @id @default(autoincrement())
+  combo_cart_item_id        Int
+  combo_merchant_product_id Int
+  presentation_var          String    @db.VarChar(255)
+  created_at                DateTime? @db.Timestamp(0)
+  updated_at                DateTime? @db.Timestamp(0)
+}
+
+model combo_products {
+  id         Int       @id @default(autoincrement())
+  combo_id   Int
+  product_id String    @db.VarChar(255)
+  variant_id String    @db.VarChar(255)
+  color      String?   @db.VarChar(255)
+  quantity   Int
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model combo_quotes_items {
+  id                Int       @id @default(autoincrement())
+  combo_merchant_id Int
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model combos {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.Text
+  image       String?   @db.Text
+  keywords    Json?
+  description String    @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  deleted_at  DateTime? @db.Timestamp(0)
+  status_id   Int
+  category_id Int
+}
+
+model conflicts {
+  id         Int       @id @default(autoincrement())
+  order_id   Int
+  status_id  Int
+  type_id    Int
+  comment    String    @db.Text
+  resolve    String    @db.Text
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([order_id], map: "conflicts_order_id_foreign")
+  @@index([status_id], map: "conflicts_status_id_foreign")
+  @@index([type_id], map: "conflicts_type_id_foreign")
+}
+
+model conflicts_conversations {
+  id          Int       @id @default(autoincrement())
+  conflict_id Int?
+  sender_id   Int?
+  content     String    @db.Text
+  read        Boolean   @default(false)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([conflict_id], map: "conflicts_conversations_conflict_id_foreign")
+  @@index([sender_id], map: "conflicts_conversations_sender_id_foreign")
+}
+
+model conflicts_status {
+  id          Int       @id @default(autoincrement())
+  code        String    @db.VarChar(255)
+  description String    @db.VarChar(255)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model conflicts_types {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model countries {
+  id                       Int                        @id @default(autoincrement())
+  code                     String                     @unique(map: "countries_code_unique") @db.Char(2)
+  name                     String                     @db.VarChar(100)
+  created_at               DateTime                   @default(now()) @db.Timestamp(0)
+  updated_at               DateTime?                  @db.Timestamp(0)
+  administrative_divisions administrative_divisions[]
+}
+
+model currencies {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(25)
+  symbol     String    @db.VarChar(25)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model days_of_the_week {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(20)
+  order      Int       @default(0) @db.SmallInt
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model decidir_installments {
+  id          Int       @id @default(autoincrement())
+  descripcion String    @db.VarChar(255)
+  tipo        String    @db.VarChar(255)
+  enabled     Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model decidir_installments_values {
+  value           Int       @db.UnsignedInt
+  cuotas          Int       @db.UnsignedInt
+  descripcion     String    @db.VarChar(255)
+  tna_aplicada    String    @db.VarChar(255)
+  tem             String    @db.VarChar(255)
+  coeficiente     Decimal   @db.Decimal(10, 4)
+  installments_id Int
+  created_at      DateTime  @default(now()) @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+
+  @@id([value, installments_id])
+  @@index([installments_id], map: "decidir_installments_values_parent_foreign")
+}
+
+model decidir_payment_methods {
+  id                                Int                                 @id @db.UnsignedInt
+  marca                             String                              @db.VarChar(255)
+  longPAN                           Int?                                @db.UnsignedInt
+  longPAN_alt                       Int?                                @db.UnsignedInt
+  formatoCVV                        String?                             @db.VarChar(255)
+  tipo                              String                              @db.VarChar(255)
+  img                               String?                             @db.VarChar(255)
+  enabled                           Boolean                             @default(true)
+  created_at                        DateTime                            @default(now()) @db.Timestamp(0)
+  updated_at                        DateTime?                           @db.Timestamp(0)
+  merchants_decidir_payment_methods merchants_decidir_payment_methods[]
+  users_cards                       users_cards[]
+}
+
+model delivery_apps {
+  device_id      String   @db.VarChar(255)
+  company_name   String   @db.VarChar(255)
+  vehicle_domain String   @db.VarChar(255)
+  vehicle_photo  String   @db.VarChar(255)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+  id             Int      @id @default(autoincrement()) @db.UnsignedInt
+  bols           bols[]
+}
+
+model delivery_rejection_reason {
+  rejection_type String       @db.VarChar(255)
+  text           String       @db.VarChar(255)
+  created_at     DateTime     @default(now()) @db.Timestamp(6)
+  updated_at     DateTime     @default(now()) @db.Timestamp(6)
+  id             Int          @id @default(autoincrement()) @db.UnsignedInt
+  bol_status     bol_status[]
+}
+
+model delivery_time_units {
+  id         Int       @id @default(autoincrement())
+  symbol     String    @db.VarChar(3)
+  name       String    @db.VarChar(20)
+  order      Int       @default(0) @db.SmallInt
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model discount_types {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  removable   Boolean   @default(true)
+  icon        String?   @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  deleted_at  DateTime? @db.Timestamp(0)
+}
+
+model discounts {
+  id               Int     @id @default(autoincrement())
+  merchant_id      Int
+  discount_type_id Int
+  enabled          Boolean @default(true)
+
+  @@unique([discount_type_id, merchant_id], map: "discount_type_merchant_unique")
+  @@index([merchant_id], map: "discount_merchant_id_foreign")
+}
+
+model discounts_users {
+  id          Int @id @default(autoincrement())
+  discount_id Int
+  user_id     Int
+  merchant_id Int
+
+  @@unique([merchant_id, user_id], map: "merchant_id_user_id_discount_user_unique")
+  @@index([discount_id], map: "discounts_users_discount_foreign")
+  @@index([user_id], map: "discounts_users_user_foreign")
+}
+
+model failed_jobs {
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model families {
+  id          Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(255)
+  code        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  state       Int       @default(1)
+  created_by  Int?
+  updated_by  Int?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model floor_sizes {
+  id         Int       @id @default(autoincrement())
+  key        String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model genders {
+  id          Int       @id @default(autoincrement())
+  description String?   @unique(map: "genders_description_unique") @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model giftcards {
+  id           Int       @id @default(autoincrement())
+  code         String    @db.Text
+  used         DateTime? @db.Date
+  amount       Float?
+  user_id      Int?
+  campaign_id  Int?
+  active       Boolean   @default(true)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  maximum_cap  Float?
+  minimum_cap  Float?
+  discount_cap Float?
+  due          DateTime? @db.Date
+  text         String?   @db.Text
+  conditions   Json?
+}
+
+model group_supplie {
+  supplie_id       Int
+  group_id         Int
+  performance      Float     @default(1.00)
+  performance_unit String?   @db.VarChar(255)
+  created_by       Int?
+  updated_by       Int?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@id([supplie_id, group_id])
+  @@index([group_id], map: "group_supplie_group_id_foreign")
+}
+
+model group_task {
+  group_id         Int
+  task_id          Int
+  performance      Float?
+  performance_unit String?   @db.VarChar(255)
+  created_by       Int?
+  updated_by       Int?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@id([group_id, task_id])
+  @@index([task_id], map: "group_task_task_id_foreign")
+}
+
+model groups {
+  id               Int       @id @default(autoincrement())
+  name             String?   @db.VarChar(255)
+  unit             String?   @db.VarChar(255)
+  use_main         Boolean   @default(true)
+  performance      Float     @default(1.00)
+  performance_unit String?   @db.VarChar(255)
+  state            Int       @default(1)
+  created_by       Int?
+  updated_by       Int?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model invoice_types {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique(map: "invoice_types_code_unique") @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model items {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  code        String?   @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  state       Int       @default(1)
+  created_by  Int?
+  updated_by  Int?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model jobs {
+  id           Int    @id @default(autoincrement())
+  queue        String @db.VarChar(255)
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "jobs_queue_index")
+}
+
+model languages {
+  id         Int       @id @default(autoincrement())
+  code       String?   @unique(map: "languages_code_unique") @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model lists {
+  id          Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(144)
+  description String?   @db.Text
+  nuqlea_fee  Float?
+  active      Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  deleted_at  DateTime? @db.Timestamp(0)
+}
+
+model manual_payment_methods {
+  id               Int       @id @default(autoincrement())
+  order_request_id String    @db.VarChar(255)
+  payment_type     String    @db.VarChar(255)
+  comments         String?   @db.VarChar(255)
+  status_id        Int?      @default(1)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  echeqs           Json?
+}
+
+model manual_payment_status {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  colorA     String?   @db.VarChar(255)
+  colorB     String?   @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model manual_product_quote_items {
+  id                  Int       @id @default(autoincrement())
+  merchant_product_id Int?
+  presentation_var    Float?
+  product_id          String?   @db.VarChar(255)
+  variant_id          String?   @db.VarChar(255)
+  color               String?   @db.VarChar(255)
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+  deleted_at          DateTime? @db.Timestamp(0)
+}
+
+model manufacturers {
+  id                          Int                           @id @default(autoincrement())
+  name                        String                        @unique(map: "manufacturers_name_unique") @db.VarChar(255)
+  created_at                  DateTime?                     @db.Timestamp(0)
+  updated_at                  DateTime?                     @db.Timestamp(0)
+  categories_to_manufacturers categories_to_manufacturers[]
+}
+
+model merchant_categories {
+  merchant_id Int
+  category_id Int
+  family_id   Int
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@id([merchant_id, category_id])
+  @@index([category_id], map: "merchant_categories_category_id_foreign")
+  @@index([family_id], map: "merchant_categories_family_id_foreign")
+}
+
+model merchant_impersonation {
+  merchant_id                    Int
+  user_id                        Int
+  merchant_notifications_seen_at DateTime? @db.Timestamp(0)
+  created_at                     DateTime  @default(now()) @db.Timestamp(0)
+  updated_at                     DateTime? @db.Timestamp(0)
+
+  @@id([user_id, merchant_id])
+  @@index([merchant_id], map: "merchant_impersonation_merchant_id_foreign")
+}
+
+model merchant_lists_rules {
+  id               Int       @id @default(autoincrement())
+  merchant_list_id Int
+  name             String?   @db.VarChar(144)
+  discount_type    String    @db.VarChar(10)
+  discount_value   Float
+  free_shipping    Boolean
+  minimum_price    Int
+  type             String    @db.VarChar(255)
+  active           Boolean
+  created_at       DateTime  @default(now()) @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  deleted_at       DateTime? @db.Timestamp(0)
+
+  @@index([merchant_list_id], map: "merchant_lists_rules_merchant_list_id_foreign")
+}
+
+model merchant_lists_rules_brands {
+  id           Int       @id @default(autoincrement())
+  list_rule_id Int
+  brand_id     Int
+  created_at   DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at   DateTime? @db.Timestamp(0)
+
+  @@index([brand_id], map: "merchant_lists_rules_brands_brand_id_foreign")
+  @@index([list_rule_id], map: "merchant_lists_rules_brands_list_rule_id_foreign")
+}
+
+model merchant_lists_rules_categories {
+  id           Int       @id @default(autoincrement())
+  list_rule_id Int
+  category_id  Int
+  created_at   DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at   DateTime? @db.Timestamp(0)
+
+  @@index([category_id], map: "merchant_lists_rules_categories_category_id_foreign")
+  @@index([list_rule_id], map: "merchant_lists_rules_categories_list_rule_id_foreign")
+}
+
+model merchant_lists_rules_zones {
+  id           Int       @id @default(autoincrement())
+  list_rule_id Int
+  zone_id      Int
+  created_at   DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at   DateTime? @db.Timestamp(0)
+
+  @@index([list_rule_id], map: "merchant_lists_rules_zones_list_rule_id_foreign")
+  @@index([zone_id], map: "merchant_lists_rules_zones_zone_id_foreign")
+}
+
+model merchant_lists_users {
+  id                Int      @id @default(autoincrement())
+  merchants_list_id Int
+  created_at        DateTime @default(now()) @db.Timestamp(0)
+  user_email        String   @db.VarChar(255)
+  user_id           Int?
+
+  @@index([merchants_list_id], map: "merchant_lists_users_merchants_list_id_foreign")
+  @@index([user_email], map: "merchant_lists_users_user_email_index")
+  @@index([user_id], map: "merchant_lists_users_user_id_foreign")
+}
+
+model merchant_payment_method {
+  id                    Int       @id @default(autoincrement())
+  merchant_id           Int
+  payment_method_id     Int
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+  pagos360_apikey       String?   @db.VarChar(255)
+  pagos360_id           String?   @db.VarChar(255)
+  pagos360_secret       String?   @db.VarChar(255)
+  santander_merchant_id Int?
+  santander_username    String?   @db.VarChar(255)
+  santander_password    String?   @db.VarChar(255)
+  santander_user_id     Int?
+  santander_policy_id   Int?
+  deleted_at            DateTime? @db.Timestamp(0)
+
+  @@index([merchant_id], map: "merchant_payment_method_merchant_id_foreign")
+  @@index([payment_method_id], map: "merchant_payment_method_payment_method_id_foreign")
+}
+
+model merchant_ratings {
+  id          Int       @id @default(autoincrement())
+  merchant_id Int
+  order_id    Int
+  user_id     Int
+  stars       Int       @db.TinyInt
+  comment     String    @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([merchant_id], map: "merchant_ratings_merchant_id_foreign")
+  @@index([order_id], map: "merchant_ratings_order_id_foreign")
+  @@index([user_id], map: "merchant_ratings_user_id_foreign")
+}
+
+model merchant_shipping_rules {
+  id                         Int       @id @default(autoincrement())
+  merchant_id                Int
+  zone_id                    Int
+  family_id                  Int?
+  families_id                String?   @db.VarChar(255)
+  delivery_days              String    @db.VarChar(255)
+  delivery_times_value       Int       @db.UnsignedSmallInt
+  delivery_times_unit_id     Int
+  order_total_min            Decimal   @default(0.0000) @db.Decimal(14, 4)
+  order_total_max            Decimal   @default(9999999999.9999) @db.Decimal(14, 4)
+  price                      Decimal   @db.Decimal(14, 4)
+  gated_community_additional Decimal   @db.Decimal(14, 4)
+  created_at                 DateTime  @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime? @db.Timestamp(0)
+  is_pickup                  Boolean
+
+  @@index([delivery_times_unit_id], map: "merchant_shipping_rules_delivery_times_unit_id_foreign")
+  @@index([family_id], map: "merchant_shipping_rules_family_id_foreign")
+  @@index([merchant_id], map: "merchant_shipping_rules_merchant_id_foreign")
+  @@index([zone_id], map: "merchant_shipping_rules_zone_id_foreign")
+}
+
+model merchant_shipping_zone_places {
+  id                   Int       @id @default(autoincrement())
+  zone_id              Int
+  country_id           Int?
+  country_code         String?   @db.Char(2)
+  admin_div_lvl_1_code String?   @db.VarChar(20)
+  admin_div_lvl_1_id   Int?
+  admin_div_lvl_2_code String?   @db.VarChar(20)
+  admin_div_lvl_2_id   Int?
+  admin_div_lvl_3_code String?   @db.VarChar(20)
+  admin_div_lvl_3_id   Int?
+  admin_div_lvl_4_code String?   @db.VarChar(20)
+  admin_div_lvl_4_id   Int?
+  place_id             Int?
+  created_at           DateTime  @default(now()) @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+
+  @@index([admin_div_lvl_1_id], map: "merchant_shipping_zone_places_admin_div_lvl_1_id_foreign")
+  @@index([admin_div_lvl_2_id], map: "merchant_shipping_zone_places_admin_div_lvl_2_id_foreign")
+  @@index([admin_div_lvl_3_id], map: "merchant_shipping_zone_places_admin_div_lvl_3_id_foreign")
+  @@index([admin_div_lvl_4_id], map: "merchant_shipping_zone_places_admin_div_lvl_4_id_foreign")
+  @@index([country_id], map: "merchant_shipping_zone_places_country_id_foreign")
+  @@index([place_id], map: "merchant_shipping_zone_places_place_id_foreign")
+  @@index([zone_id], map: "merchant_shipping_zone_places_zone_id_foreign")
+}
+
+model merchant_shipping_zones {
+  id          Int       @id @default(autoincrement())
+  merchant_id Int
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  is_pickup   Boolean   @default(false)
+
+  @@index([merchant_id], map: "merchant_shipping_zones_merchant_id_foreign")
+}
+
+model merchants {
+  id                                      Int                 @id @default(autoincrement())
+  name                                    String              @db.VarChar(255)
+  business_name                           String              @db.VarChar(255)
+  logo                                    String              @db.VarChar(255)
+  cuit                                    String              @db.VarChar(255)
+  address_name_old                        String?             @db.VarChar(255)
+  address_formatted_address_old           String?             @db.VarChar(255)
+  address_place_id_old                    String?             @db.VarChar(255)
+  address_route_old                       String?             @db.VarChar(255)
+  address_street_number_old               String?             @db.VarChar(255)
+  address_postal_code_old                 String?             @db.VarChar(255)
+  address_locality_old                    String?             @db.VarChar(255)
+  address_country_old                     String?             @db.VarChar(255)
+  address_administrative_area_level_1_old String?             @db.VarChar(255)
+  address_administrative_area_level_2_old String?             @db.VarChar(255)
+  address_latitude_old                    Decimal?            @db.Decimal(11, 7)
+  address_longitude_old                   Decimal?            @db.Decimal(11, 7)
+  email                                   String              @db.VarChar(255)
+  phone                                   String              @db.VarChar(255)
+  enabled                                 Boolean             @default(false)
+  chat_enabled                            Boolean             @default(false)
+  paymentMethod_decidir                   Boolean             @default(false)
+  paymentMethod_mercadopago               Boolean             @default(false)
+  paymentMethod_bank_transfer             Boolean             @default(false)
+  mercadopago_collector_id                Int?                @unique(map: "merchants_mercadopago_collector_id_unique") @db.UnsignedInt
+  decidir_site_id                         String?             @db.VarChar(255)
+  bank_transfer_bank                      String?             @db.VarChar(255)
+  bank_transfer_account_number            String?             @db.VarChar(255)
+  bank_transfer_cbu                       String?             @db.VarChar(255)
+  style_color                             String?             @db.VarChar(255)
+  style_image                             String?             @db.VarChar(255)
+  created_at                              DateTime            @default(now()) @db.Timestamp(0)
+  updated_at                              DateTime?           @db.Timestamp(0)
+  address_place_id                        String?             @db.VarChar(255)
+  address_route                           String?             @db.VarChar(255)
+  address_street_number                   String?             @db.VarChar(255)
+  slug                                    String?             @db.VarChar(150)
+  role                                    String?             @db.VarChar(255)
+  paymentMethod_pagos360                  Int                 @default(0) @db.TinyInt
+  meli_discount                           Decimal?            @db.Decimal(8, 2)
+  onboarding_finished                     Boolean             @default(true)
+  banners_merchants                       banners_merchants[]
+}
+
+model merchants_decidir_payment_methods {
+  id                      Int                     @db.UnsignedInt
+  site_id                 String                  @db.VarChar(255)
+  merchant_id             Int
+  installments_id         Int
+  created_at              DateTime                @default(now()) @db.Timestamp(0)
+  updated_at              DateTime?               @db.Timestamp(0)
+  decidir_payment_methods decidir_payment_methods @relation(fields: [id], references: [id], onDelete: Cascade, map: "merchants_decidir_payment_methods_id_foreign")
+
+  @@id([id, merchant_id])
+  @@index([installments_id], map: "merchants_decidir_payment_methods_installments_id_foreign")
+  @@index([merchant_id], map: "merchants_decidir_payment_methods_merchant_id_foreign")
+}
+
+model merchants_lists {
+  id          Int       @id @default(autoincrement())
+  list_id     Int
+  merchant_id Int
+  name        String?   @db.VarChar(144)
+  description String?   @db.Text
+  active      Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  deleted_at  DateTime? @db.Timestamp(0)
+
+  @@index([list_id], map: "merchants_lists_list_id_foreign")
+  @@index([merchant_id], map: "merchants_lists_merchant_id_foreign")
+}
+
+model merchants_product_free_shipping_zones {
+  merchant_product_id Int
+  zone_id             Int
+  created_at          DateTime @default(now()) @db.Timestamp(0)
+
+  @@id([merchant_product_id, zone_id])
+  @@index([zone_id], map: "fk_mpfsz_zone_id")
+}
+
+model merchants_products {
+  id                   Int                    @id @default(autoincrement())
+  merchant_id          Int
+  product_id           Int?
+  pim_root_id          String?                @db.VarChar(255)
+  pim_id               String?                @db.VarChar(255)
+  presentation_id      Int?
+  color_id             Int?
+  status_id            Int
+  code                 String?                @db.VarChar(255)
+  stock                Int
+  price                Decimal                @db.Decimal(14, 4)
+  offer_type           String?                @db.VarChar(255)
+  offer_value          Decimal?               @db.Decimal(14, 4)
+  color                String?                @db.VarChar(255)
+  free_shipping        Boolean                @default(false)
+  created_at           DateTime?              @db.Timestamp(0)
+  updated_at           DateTime?              @db.Timestamp(0)
+  deleted_at           DateTime?              @db.Timestamp(0)
+  bol_merchant_product bol_merchant_product[]
+
+  @@index([merchant_id], map: "merchants_products_merchant_id_foreign")
+  @@index([presentation_id], map: "merchants_products_presentation_id_foreign")
+  @@index([product_id], map: "merchants_products_product_id_foreign")
+  @@index([status_id], map: "merchants_products_status_id_foreign")
+}
+
+model merchants_products_order_items {
+  id                  Int       @id @default(autoincrement())
+  merchant_product_id Int
+  presentation_var    Float?
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+
+  @@index([merchant_product_id], map: "merchants_products_order_items_merchant_product_id_foreign")
+}
+
+model merchants_products_price_history {
+  id                  String    @id @db.Char(36)
+  price               Decimal   @db.Decimal(14, 4)
+  timestamp           DateTime  @db.Timestamp(0)
+  merchant_product_id Int
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+
+  @@index([merchant_product_id], map: "merchants_products_price_history_merchant_product_id_foreign")
+}
+
+model merchants_products_status {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  color      String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model mkt_list {
+  id                       Int       @id @default(autoincrement())
+  user_id                  Int
+  user_email               String    @db.VarChar(255)
+  taken_by                 Int?
+  taken_by_email           String?   @db.VarChar(255)
+  name                     String?   @db.VarChar(255)
+  file_path                String    @db.VarChar(255)
+  phone                    String?   @db.VarChar(255)
+  shipping_date            DateTime? @db.Date
+  is_open                  Boolean   @default(false)
+  user_shipping_address_id Int
+  status_id                Int
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+  deleted_at               DateTime? @db.Timestamp(0)
+}
+
+model mkt_list_status {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+}
+
+model mkt_list_status_history {
+  id         Int       @id @default(autoincrement())
+  list_id    Int
+  status_id  Int
+  is_open    Boolean
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+}
+
+model model_has_permissions {
+  permission_id Int
+  model_type    String @db.VarChar(255)
+  model_id      Int
+  team_id       Int
+
+  @@id([team_id, permission_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_permissions_model_id_model_type_index")
+  @@index([permission_id], map: "model_has_permissions_permission_id_foreign")
+  @@index([team_id], map: "model_has_permissions_team_foreign_key_index")
+}
+
+model model_has_roles {
+  role_id    Int
+  model_type String @db.VarChar(255)
+  model_id   Int
+  team_id    Int
+
+  @@id([team_id, role_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
+  @@index([role_id], map: "model_has_roles_role_id_foreign")
+  @@index([team_id], map: "model_has_roles_team_foreign_key_index")
+}
+
+model monitoring_programs {
+  id                 Int       @id @default(autoincrement())
+  name               String    @db.VarChar(255)
+  url                String    @db.VarChar(255)
+  is_restricted      Boolean
+  filtered_attribute String    @db.VarChar(255)
+  filter_values      String    @db.VarChar(255)
+  place_id           Int?
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model notifications {
+  id              String    @id @db.Char(36)
+  type            String    @db.VarChar(255)
+  notifiable_type String    @db.VarChar(255)
+  notifiable_id   Int
+  data            String    @db.Text
+  read_at         DateTime? @db.Timestamp(0)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+
+  @@index([notifiable_type, notifiable_id], map: "notifications_notifiable_type_notifiable_id_index")
+}
+
+model oauth_access_tokens {
+  id         String    @id @db.VarChar(100)
+  user_id    Int?
+  client_id  Int
+  name       String?   @db.VarChar(255)
+  scopes     String?   @db.Text
+  revoked    Boolean
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_access_tokens_user_id_index")
+}
+
+model oauth_auth_codes {
+  id         String    @id @db.VarChar(100)
+  user_id    Int
+  client_id  Int
+  scopes     String?   @db.Text
+  revoked    Boolean
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_auth_codes_user_id_index")
+}
+
+model oauth_clients {
+  id                     Int       @id @default(autoincrement())
+  user_id                Int?
+  name                   String    @db.VarChar(255)
+  secret                 String?   @db.VarChar(100)
+  provider               String?   @db.VarChar(255)
+  redirect               String    @db.Text
+  personal_access_client Boolean
+  password_client        Boolean
+  revoked                Boolean
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "oauth_clients_user_id_index")
+}
+
+model oauth_personal_access_clients {
+  id         Int       @id @default(autoincrement())
+  client_id  Int
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model oauth_refresh_tokens {
+  id              String    @id @db.VarChar(100)
+  access_token_id String    @db.VarChar(100)
+  revoked         Boolean
+  expires_at      DateTime? @db.DateTime(0)
+
+  @@index([access_token_id], map: "oauth_refresh_tokens_access_token_id_index")
+}
+
+model onboarder_state {
+  id                   Int       @id @default(autoincrement())
+  approved_merchant    Boolean   @default(false)
+  merchant_id          Int       @unique(map: "onboarder_state_merchant_id")
+  onboarder_version_id Int       @default(1)
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+
+  @@index([onboarder_version_id], map: "onboarder_state_version_id_foreign")
+}
+
+model onboarder_steps {
+  id                  Int       @id @default(autoincrement())
+  onboarding_state_id Int
+  step_number         Int
+  skipped_step        Boolean   @default(false)
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+
+  @@unique([onboarding_state_id, step_number])
+}
+
+model onboarder_version {
+  id                 Int    @id @default(autoincrement())
+  steps_quantity     Int
+  steps_labels       String @db.VarChar(255)
+  optional_steps     String @db.VarChar(255)
+  complete_later     String @db.VarChar(255)
+  confirmation_steps String @db.VarChar(255)
+}
+
+model order_billings {
+  id                        Int       @id @default(autoincrement())
+  billing_name              String    @db.VarChar(255)
+  contact_email             String    @db.VarChar(255)
+  contact_phone_number      String    @db.VarChar(255)
+  identification_number     String    @db.VarChar(255)
+  place_id                  Int
+  address_route             String    @db.VarChar(255)
+  address_street_number     String    @db.VarChar(255)
+  extra                     String?   @db.VarChar(255)
+  invoice_require_factura_a Boolean   @default(false)
+  created_at                DateTime? @db.Timestamp(0)
+  updated_at                DateTime? @db.Timestamp(0)
+
+  @@index([place_id], map: "order_billings_place_id_foreign")
+}
+
+model order_delivery_methods {
+  id               Int       @id @default(autoincrement())
+  deliverable_type String    @db.VarChar(255)
+  deliverable_id   Int
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@index([deliverable_type, deliverable_id], map: "order_delivery_methods_deliverable_type_deliverable_id_index")
+}
+
+model order_delivery_times {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model order_payment_methods {
+  id                Int       @id @default(autoincrement())
+  payment_method_id Int
+  paymentable_type  String    @db.VarChar(255)
+  paymentable_id    Int
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+
+  @@index([payment_method_id], map: "order_payment_methods_payment_method_id_foreign")
+  @@index([paymentable_type, paymentable_id], map: "order_payment_methods_paymentable_type_paymentable_id_index")
+}
+
+model order_request_items {
+  id               Int       @id @default(autoincrement())
+  order_request_id Int?
+  itemable_type    String    @db.VarChar(255)
+  itemable_id      Int
+  price            Float
+  total            Float
+  quantity         Float
+  quantity_text    String?   @db.VarChar(255)
+  offer_type       String?   @db.VarChar(255)
+  offer_value      Float?
+  nuqlea_fee       Float?
+  IVA              Float?
+  item_name        String?   @db.VarChar(255)
+  item_image       String?   @db.VarChar(255)
+  item_description Json?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@index([itemable_type, itemable_id], map: "order_request_items_itemable_type_itemable_id_index")
+  @@index([order_request_id], map: "order_request_items_order_request_id_foreign")
+}
+
+model order_requests {
+  id                       Int       @id @default(autoincrement())
+  purchase_request_id      Int
+  list_id                  String?   @db.VarChar(255)
+  user_id                  Int
+  merchant_id              Int
+  family_id                Int?
+  order_payment_method_id  Int?
+  order_delivery_method_id Int?
+  order_billing_id         Int?
+  manual_payment_id        Int?
+  success                  Boolean
+  error                    Boolean   @default(false)
+  contact_email            String?   @db.VarChar(255)
+  contact_phone_number     String?   @db.VarChar(255)
+  identification_number    String?   @db.VarChar(255)
+  comment                  String?   @db.VarChar(255)
+  total                    Float?
+  nuqlea_fee               Float?
+  giftcard_id              Int?
+  giftcard_amount          Float?
+  giftcard_code            String?   @db.Text
+  was_manually_quoted      Boolean   @default(false)
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+  deleted_at               DateTime? @db.Timestamp(0)
+
+  @@index([family_id], map: "order_requests_family_id_foreign")
+  @@index([giftcard_id], map: "order_requests_giftcard_id_foreign")
+  @@index([merchant_id], map: "order_requests_merchant_id_foreign")
+  @@index([order_billing_id], map: "order_requests_order_billing_id_foreign")
+  @@index([order_delivery_method_id], map: "order_requests_order_delivery_method_id_foreign")
+  @@index([order_payment_method_id], map: "order_requests_order_payment_method_id_foreign")
+  @@index([purchase_request_id], map: "order_requests_purchase_request_id_foreign")
+  @@index([user_id], map: "order_requests_user_id_foreign")
+}
+
+model order_status {
+  id            Int             @id @default(autoincrement())
+  code          String          @db.VarChar(255)
+  colorA        String          @db.VarChar(255)
+  colorB        String          @db.VarChar(255)
+  text          String          @db.VarChar(255)
+  created_at    DateTime?       @db.Timestamp(0)
+  updated_at    DateTime?       @db.Timestamp(0)
+  chat_messages chat_messages[]
+}
+
+model orders {
+  id                                          Int       @id @default(autoincrement())
+  reference                                   String    @db.VarChar(255)
+  order_request_id                            Int?
+  chat_room_id                                Int?
+  merchant_id                                 Int
+  items_count                                 Int       @db.UnsignedInt
+  comment                                     String?   @db.Text
+  business_name                               String?   @db.VarChar(255)
+  document                                    String?   @db.VarChar(255)
+  address_name_old                            String?   @db.VarChar(255)
+  address_formatted_address_old               String?   @db.VarChar(255)
+  address_place_id_old                        String?   @db.VarChar(255)
+  address_route_old                           String?   @db.VarChar(255)
+  address_street_number_old                   String?   @db.VarChar(255)
+  address_postal_code_old                     String?   @db.VarChar(255)
+  address_locality_old                        String?   @db.VarChar(255)
+  address_country_old                         String?   @db.VarChar(255)
+  address_administrative_area_level_1_old     String?   @db.VarChar(255)
+  address_administrative_area_level_2_old     String?   @db.VarChar(255)
+  address_latitude_old                        Decimal?  @db.Decimal(11, 7)
+  address_longitude_old                       Decimal?  @db.Decimal(11, 7)
+  address_extra                               String?   @db.VarChar(255)
+  delivery_time_id                            Int?
+  tax_address_name_old                        String?   @db.VarChar(255)
+  tax_address_formatted_address_old           String?   @db.VarChar(255)
+  tax_address_place_id_old                    String?   @db.VarChar(255)
+  tax_address_route_old                       String?   @db.VarChar(255)
+  tax_address_street_number_old               String?   @db.VarChar(255)
+  tax_address_postal_code_old                 String?   @db.VarChar(255)
+  tax_address_locality_old                    String?   @db.VarChar(255)
+  tax_address_country_old                     String?   @db.VarChar(255)
+  tax_address_administrative_area_level_1_old String?   @db.VarChar(255)
+  tax_address_administrative_area_level_2_old String?   @db.VarChar(255)
+  tax_address_latitude_old                    Decimal?  @db.Decimal(11, 7)
+  tax_address_longitude_old                   Decimal?  @db.Decimal(11, 7)
+  tax_address_extra                           String?   @db.VarChar(255)
+  payment_method_id                           Int?
+  purchase_id                                 Int
+  mercadopago_payment_id                      String?   @db.VarChar(255)
+  decidir_payment_id                          String?   @db.VarChar(255)
+  decidir_payment_data                        String?   @db.LongText
+  decidir_payment_installments                String?   @db.LongText
+  decidir_payment_amount                      Decimal?  @db.Decimal(30, 20)
+  decidir_total                               Decimal?  @db.Decimal(30, 20)
+  decidir_total_original                      Decimal?  @db.Decimal(30, 20)
+  decidir_financing_expenses                  Decimal?  @db.Decimal(30, 20)
+  decidir_installments_value                  Int?      @db.UnsignedInt
+  decidir_installments_coeficiente            Decimal?  @db.Decimal(10, 4)
+  decidir_confirm_data                        String?   @db.LongText
+  decidir_refunds_data                        String?   @db.LongText
+  bank_transfer_total                         Decimal?  @db.Decimal(30, 20)
+  bank_transfer_discount                      Decimal?  @db.Decimal(30, 20)
+  shipping_method_id                          String?   @db.Char(36)
+  shipping_total                              Decimal?  @db.Decimal(14, 4)
+  shipping_price                              Decimal?  @db.Decimal(14, 4)
+  shipping_gated_community_additional         Decimal?  @db.Decimal(14, 4)
+  shipping_text                               String?   @db.VarChar(255)
+  shipping_is_pickup                          Boolean   @default(false)
+  subtotal                                    Decimal   @db.Decimal(30, 20)
+  total                                       Decimal   @db.Decimal(30, 20)
+  total_final                                 Decimal   @db.Decimal(30, 20)
+  contact_email                               String    @db.VarChar(255)
+  contact_phone_number                        String    @db.VarChar(255)
+  user_id                                     Int?
+  guest_id                                    String?   @db.VarChar(255)
+  status_id                                   Int
+  due_date                                    DateTime? @db.DateTime(0)
+  created_at                                  DateTime? @db.Timestamp(0)
+  updated_at                                  DateTime? @db.Timestamp(0)
+  deleted_at                                  DateTime? @db.Timestamp(0)
+  invoice_requireFacturaA                     Boolean   @default(false)
+  invoice_delivered                           Boolean   @default(false)
+  invoice_type_id                             Int?
+  invoice_link                                String?   @db.VarChar(255)
+  directSale_id                               String?   @unique(map: "orders_directsale_id_unique") @db.VarChar(255)
+  directSale_createdBy                        Int?
+  address_place_id                            Int?
+  address_route                               String?   @db.VarChar(255)
+  address_street_number                       String?   @db.VarChar(255)
+  tax_address_place_id                        Int?
+  tax_address_route                           String?   @db.VarChar(255)
+  tax_address_street_number                   String?   @db.VarChar(255)
+  giftcard_id                                 Int?
+  giftcard_amount                             Float?
+  giftcard_code                               String?   @db.Text
+  address_is_gated_community                  Boolean   @default(false)
+  pagos_360_id                                Int?
+
+  @@index([address_place_id], map: "orders_address_place_id_foreign")
+  @@index([chat_room_id], map: "orders_chat_room_id_foreign")
+  @@index([directSale_createdBy], map: "orders_directsale_createdby_foreign")
+  @@index([invoice_type_id], map: "orders_invoice_type_id_foreign")
+  @@index([merchant_id], map: "orders_merchant_id_foreign")
+  @@index([payment_method_id], map: "orders_payment_method_id_foreign")
+  @@index([purchase_id], map: "orders_purchase_id_foreign")
+  @@index([status_id], map: "orders_status_id_foreign")
+  @@index([tax_address_place_id], map: "orders_tax_address_place_id_foreign")
+  @@index([user_id], map: "orders_user_id_foreign")
+}
+
+model orders_history {
+  id         Int       @id @default(autoincrement())
+  order_id   Int
+  status_id  Int
+  comment    String?   @db.Text
+  notify     Boolean   @default(false)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([order_id], map: "orders_history_order_id_foreign")
+  @@index([status_id], map: "orders_history_status_id_foreign")
+}
+
+model orders_items {
+  id                  Int       @id @default(autoincrement())
+  order_id            Int?
+  merchant_product_id Int?
+  product_id          Int?
+  presentation_id     Int?
+  color               Int?
+  pim_root_id         String?   @db.VarChar(255)
+  pim_id              String?   @db.VarChar(255)
+  item_name           String?   @db.VarChar(255)
+  item_image          String?   @db.VarChar(255)
+  item_description    Json?
+  price               Decimal   @db.Decimal(14, 4)
+  quantity            Int       @db.UnsignedInt
+  quantity_text       String?   @db.VarChar(255)
+  total               Decimal   @db.Decimal(14, 4)
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+  combo_merchant_id   Int?
+  presentation_var    Float?
+  calc_id             Int?
+
+  @@index([combo_merchant_id], map: "orders_items_combo_merchant_id_foreign")
+  @@index([merchant_product_id], map: "orders_items_merchant_product_id_foreign")
+  @@index([order_id], map: "orders_items_order_id_foreign")
+  @@index([product_id], map: "orders_items_product_id_foreign")
+}
+
+model orders_tmp {
+  id                                          Int       @id @default(autoincrement())
+  reference                                   String    @unique(map: "orders_tmp_reference_unique") @db.VarChar(255)
+  merchant_id                                 Int
+  items_count                                 Int       @db.UnsignedInt
+  contact_email                               String?   @db.VarChar(255)
+  contact_phone_number                        String?   @db.VarChar(255)
+  comment                                     String?   @db.Text
+  business_name                               String?   @db.VarChar(255)
+  document                                    String?   @db.VarChar(255)
+  address_name_old                            String?   @db.VarChar(255)
+  address_formatted_address_old               String?   @db.VarChar(255)
+  address_place_id_old                        String?   @db.VarChar(255)
+  address_route_old                           String?   @db.VarChar(255)
+  address_street_number_old                   String?   @db.VarChar(255)
+  address_postal_code_old                     String?   @db.VarChar(255)
+  address_locality_old                        String?   @db.VarChar(255)
+  address_country_old                         String?   @db.VarChar(255)
+  address_administrative_area_level_1_old     String?   @db.VarChar(255)
+  address_administrative_area_level_2_old     String?   @db.VarChar(255)
+  address_latitude_old                        Decimal?  @db.Decimal(11, 7)
+  address_longitude_old                       Decimal?  @db.Decimal(11, 7)
+  address_extra                               String?   @db.VarChar(255)
+  delivery_time_id                            Int?
+  tax_address_name_old                        String?   @db.VarChar(255)
+  tax_address_formatted_address_old           String?   @db.VarChar(255)
+  tax_address_place_id_old                    String?   @db.VarChar(255)
+  tax_address_route_old                       String?   @db.VarChar(255)
+  tax_address_street_number_old               String?   @db.VarChar(255)
+  tax_address_postal_code_old                 String?   @db.VarChar(255)
+  tax_address_locality_old                    String?   @db.VarChar(255)
+  tax_address_country_old                     String?   @db.VarChar(255)
+  tax_address_administrative_area_level_1_old String?   @db.VarChar(255)
+  tax_address_administrative_area_level_2_old String?   @db.VarChar(255)
+  tax_address_latitude_old                    Decimal?  @db.Decimal(11, 7)
+  tax_address_longitude_old                   Decimal?  @db.Decimal(11, 7)
+  tax_address_extra                           String?   @db.VarChar(255)
+  shipping_method_id                          String?   @db.Char(36)
+  shipping_total                              Decimal?  @db.Decimal(14, 4)
+  shipping_price                              Decimal?  @db.Decimal(14, 4)
+  shipping_gated_community_additional         Decimal?  @db.Decimal(14, 4)
+  shipping_text                               String?   @db.VarChar(255)
+  shipping_is_pickup                          Boolean   @default(false)
+  payment_method_id                           Int?
+  mercadopago_payment_id                      String?   @db.VarChar(255)
+  decidir_payment_id                          String?   @db.VarChar(255)
+  decidir_total                               Decimal?  @db.Decimal(30, 20)
+  decidir_total_original                      Decimal?  @db.Decimal(30, 20)
+  decidir_financing_expenses                  Decimal?  @db.Decimal(30, 20)
+  decidir_installments_value                  Int?      @db.UnsignedInt
+  decidir_installments_coeficiente            Decimal?  @db.Decimal(10, 4)
+  bank_transfer_total                         Decimal?  @db.Decimal(30, 20)
+  bank_transfer_discount                      Decimal?  @db.Decimal(30, 20)
+  subtotal                                    Decimal   @db.Decimal(30, 20)
+  total                                       Decimal   @db.Decimal(30, 20)
+  total_final                                 Decimal   @db.Decimal(30, 20)
+  purchase_id                                 Int
+  user_id                                     Int?
+  guest_id                                    String?   @db.VarChar(255)
+  created_at                                  DateTime? @db.Timestamp(0)
+  updated_at                                  DateTime? @db.Timestamp(0)
+  invoice_requireFacturaA                     Boolean   @default(false)
+  address_place_id                            Int?
+  address_route                               String?   @db.VarChar(255)
+  address_street_number                       String?   @db.VarChar(255)
+  tax_address_place_id                        Int?
+  tax_address_route                           String?   @db.VarChar(255)
+  tax_address_street_number                   String?   @db.VarChar(255)
+  giftcard_id                                 Int?
+  giftcard_amount                             Float?
+  giftcard_code                               String?   @db.Text
+  address_is_gated_community                  Boolean   @default(false)
+
+  @@index([address_place_id], map: "orders_tmp_address_place_id_foreign")
+  @@index([merchant_id], map: "orders_tmp_merchant_id_foreign")
+  @@index([payment_method_id], map: "orders_tmp_payment_method_id_foreign")
+  @@index([purchase_id], map: "orders_tmp_purchase_id_foreign")
+  @@index([tax_address_place_id], map: "orders_tmp_tax_address_place_id_foreign")
+  @@index([user_id], map: "orders_tmp_user_id_foreign")
+}
+
+model orders_tmp_items {
+  id                  Int       @id @default(autoincrement())
+  order_id            Int
+  product_id          Int
+  merchant_product_id Int?
+  price               Decimal   @db.Decimal(14, 4)
+  quantity            Int       @db.UnsignedInt
+  quantity_text       String?   @db.VarChar(255)
+  total               Decimal   @db.Decimal(14, 4)
+  offer_type          String?   @map("_offer_type") @db.VarChar(255)
+  offer_value         Decimal?  @map("_offer_value") @db.Decimal(14, 4)
+  cappFee             Decimal   @map("_cappFee") @db.Decimal(7, 6)
+  IVA                 Decimal   @map("_IVA") @db.Decimal(7, 6)
+  paymentMethodFee    Decimal   @map("_paymentMethodFee") @db.Decimal(7, 6)
+  decidir_fee         Decimal   @map("_decidir_fee") @db.Decimal(7, 6)
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+  combo_merchant_id   Int?
+  presentation_var    Float?
+  calc_id             Int?
+
+  @@index([combo_merchant_id], map: "orders_tmp_items_combo_merchant_id_foreign")
+  @@index([merchant_product_id], map: "orders_tmp_items_merchant_product_id_foreign")
+  @@index([order_id], map: "orders_tmp_items_order_id_foreign")
+  @@index([product_id], map: "orders_tmp_items_product_id_foreign")
+}
+
+model pagos_360_payment_methods {
+  id           Int       @id @default(autoincrement())
+  pagos_360_id Int?
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model payment_methods {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique(map: "payment_methods_code_unique") @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model permissions {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  guard_name String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@unique([name, guard_name], map: "permissions_name_guard_name_unique")
+}
+
+model personal_access_tokens {
+  id             Int       @id @default(autoincrement())
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   Int
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model pickup_delivery_methods {
+  id                    Int       @id @default(autoincrement())
+  place_id              Int?
+  address_route         String?   @db.VarChar(255)
+  address_street_number String?   @db.VarChar(255)
+  address_extra         String?   @db.VarChar(255)
+  description           Json?
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+
+  @@index([place_id], map: "pickup_delivery_methods_place_id_foreign")
+}
+
+model places {
+  id                   Int       @id @default(autoincrement())
+  name                 String    @db.VarChar(180)
+  country_id           Int?
+  postal_code          String    @db.VarChar(20)
+  country_code         String?   @db.Char(2)
+  admin_div_lvl_1_code String?   @db.VarChar(20)
+  admin_div_lvl_1_id   Int?
+  admin_div_lvl_2_code String?   @db.VarChar(20)
+  admin_div_lvl_2_id   Int?
+  admin_div_lvl_3_code String?   @db.VarChar(20)
+  admin_div_lvl_3_id   Int?
+  admin_div_lvl_4_code String?   @db.VarChar(20)
+  admin_div_lvl_4_id   Int?
+  latitude             Decimal?  @db.Decimal(11, 7)
+  longitude            Decimal?  @db.Decimal(11, 7)
+  accuracy             Int?      @db.UnsignedTinyInt
+  created_at           DateTime  @default(now()) @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+
+  @@index([admin_div_lvl_1_id], map: "places_admin_div_lvl_1_id_foreign")
+  @@index([admin_div_lvl_2_id], map: "places_admin_div_lvl_2_id_foreign")
+  @@index([admin_div_lvl_3_id], map: "places_admin_div_lvl_3_id_foreign")
+  @@index([admin_div_lvl_4_id], map: "places_admin_div_lvl_4_id_foreign")
+  @@index([country_id], map: "places_country_id_foreign")
+}
+
+model presentations {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model product_carts_items {
+  id                  Int       @id @default(autoincrement())
+  merchant_product_id Int
+  presentation_var    Float?
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+}
+
+model product_quotes_items {
+  id                  Int       @id @default(autoincrement())
+  merchant_product_id Int
+  presentation_var    Float?
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+}
+
+model product_reviews {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  name       String    @db.VarChar(255)
+  email      String    @db.VarChar(255)
+  stars      Int       @db.UnsignedTinyInt
+  comment    String    @db.Text
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([product_id], map: "product_reviews_product_id_foreign")
+  @@index([user_id], map: "product_reviews_user_id_foreign")
+}
+
+model product_status {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  color      String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model products {
+  id                 Int                @id @default(autoincrement())
+  name               String             @db.VarChar(255)
+  name_original      String?            @db.VarChar(255)
+  description        String             @db.LongText
+  sku                String?            @db.VarChar(255)
+  brand_id           Int
+  category_id        Int
+  status_id          Int
+  reference_id       Int?
+  unit_id            Int?
+  withColor          Int?               @db.TinyInt
+  edge               String?            @db.VarChar(255)
+  finished           String?            @db.VarChar(255)
+  number_of_hands    String?            @db.VarChar(255)
+  dilution           String?            @db.VarChar(255)
+  dimensions         String?            @db.VarChar(255)
+  extra              String?            @db.VarChar(255)
+  line               String?            @db.VarChar(255)
+  material           String?            @db.VarChar(255)
+  performance        String?            @db.VarChar(255)
+  termination        String?            @db.VarChar(255)
+  use                String?            @db.VarChar(255)
+  calc_quantity      Decimal?           @db.Decimal(14, 4)
+  calc_quantity_text String?            @db.VarChar(255)
+  calc_performance   Decimal?           @db.Decimal(14, 4)
+  created_at         DateTime?          @db.Timestamp(0)
+  updated_at         DateTime?          @db.Timestamp(0)
+  manufacturer_id    Int?
+  application        String?            @db.VarChar(255)
+  keywords           String?            @db.LongText
+  deleted_at         DateTime?          @db.Timestamp(0)
+  ready_prod         Boolean            @default(false)
+  banners_products   banners_products[]
+
+  @@index([brand_id], map: "products_brand_id_foreign")
+  @@index([category_id], map: "products_category_id_foreign")
+  @@index([manufacturer_id], map: "products_manufacturer_id_foreign")
+  @@index([reference_id], map: "products_reference_id_foreign")
+  @@index([status_id], map: "products_status_id_foreign")
+  @@index([unit_id], map: "products_unit_id_foreign")
+}
+
+model products_images {
+  id         String    @db.Char(36)
+  img        String    @db.VarChar(255)
+  product_id Int
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+
+  @@id([id, product_id])
+  @@index([product_id], map: "products_images_product_id_foreign")
+}
+
+model products_presentations {
+  id               Int       @id @default(autoincrement())
+  index            Int       @db.UnsignedInt
+  colors           String?   @db.Text
+  quantity         Decimal?  @db.Decimal(14, 4)
+  text             String?   @db.VarChar(255)
+  sku              String?   @db.VarChar(255)
+  calc_performance Decimal?  @db.Decimal(14, 4)
+  product_id       Int
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  deleted_at       DateTime? @db.Timestamp(0)
+  data_cleaning    Int?      @db.UnsignedTinyInt
+
+  @@index([product_id], map: "products_presentations_product_id_foreign")
+}
+
+model products_presentations_colors {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(255)
+  ean13           String?   @db.VarChar(255)
+  presentation_id Int
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+  deleted_at      DateTime? @db.Timestamp(0)
+
+  @@index([presentation_id], map: "products_presentations_colors_presentation_id_foreign")
+}
+
+model professionalactivities {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model purchase_requests {
+  id                Int       @id @default(autoincrement())
+  reference         String    @default("1e06b91f-a982-4295-a8bb-d9904036bcc2") @db.Char(36)
+  quote_id          Int?
+  user_id           Int
+  created_by        Int?
+  due_date          DateTime? @db.Timestamp(0)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+  manual_payment_id Int?      @default(0)
+
+  @@index([user_id], map: "purchase_requests_user_id_foreign")
+}
+
+model purchases {
+  id                         Int       @id @default(autoincrement())
+  reference                  String    @unique(map: "purchases_reference_unique") @db.VarChar(255)
+  shipping_count             Int       @db.UnsignedInt
+  subtotal                   Decimal   @db.Decimal(30, 20)
+  shipping_total             Decimal?  @db.Decimal(14, 4)
+  total                      Decimal   @db.Decimal(30, 20)
+  decidir_total              Decimal?  @db.Decimal(30, 20)
+  decidir_financing_expenses Decimal?  @db.Decimal(30, 20)
+  bank_transfer_total        Decimal?  @db.Decimal(30, 20)
+  bank_transfer_discount     Decimal?  @db.Decimal(30, 20)
+  total_final                Decimal   @db.Decimal(30, 20)
+  user_id                    Int?
+  created_by                 Int?
+  guest_id                   String?   @db.VarChar(255)
+  created_at                 DateTime? @db.Timestamp(0)
+  updated_at                 DateTime? @db.Timestamp(0)
+  directSale_id              String?   @unique(map: "purchases_directsale_id_unique") @db.VarChar(255)
+  directSale_createdBy       Int?
+
+  @@index([directSale_createdBy], map: "purchases_directsale_createdby_foreign")
+  @@index([user_id], map: "purchases_user_id_foreign")
+}
+
+model purchases_tmp {
+  id                         Int       @id @default(autoincrement())
+  reference                  String    @unique(map: "purchases_tmp_reference_unique") @db.VarChar(255)
+  shipping_count             Int       @db.UnsignedInt
+  subtotal                   Decimal   @db.Decimal(30, 20)
+  shipping_total             Decimal?  @db.Decimal(14, 4)
+  total                      Decimal   @db.Decimal(30, 20)
+  decidir_total              Decimal?  @db.Decimal(30, 20)
+  decidir_financing_expenses Decimal?  @db.Decimal(30, 20)
+  bank_transfer_total        Decimal?  @db.Decimal(30, 20)
+  bank_transfer_discount     Decimal?  @db.Decimal(30, 20)
+  total_final                Decimal   @db.Decimal(30, 20)
+  cart_id                    Int       @unique(map: "purchases_tmp_cart_id_unique")
+  user_id                    Int?
+  guest_id                   String?   @db.VarChar(255)
+  created_at                 DateTime? @db.Timestamp(0)
+  updated_at                 DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "purchases_tmp_user_id_foreign")
+}
+
+model quote_settings {
+  id         Int       @id @default(autoincrement())
+  is_pickup  Boolean
+  place_id   Int
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model quote_status {
+  id              Int       @id @default(autoincrement())
+  code            String    @db.VarChar(255)
+  label_for_mkt   String    @db.VarChar(255)
+  label_for_admin String    @db.VarChar(255)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+}
+
+model quotes {
+  id                       Int       @id @default(autoincrement())
+  uuid                     String?   @unique(map: "quotes_uuid_unique") @db.Char(36)
+  cart_id                  Int?
+  user_id                  Int?
+  place_id                 Int?
+  is_pickup                Boolean   @default(false)
+  billing_id               Int?
+  user_shipping_address_id Int?
+  due_date                 DateTime? @db.Timestamp(0)
+  email_already_sent       Boolean   @default(false)
+  taken_by                 Int?
+  is_manual                Boolean   @default(false)
+  status_id                Int       @default(1)
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+  deleted_at               DateTime? @db.Timestamp(0)
+}
+
+model quotes_items {
+  id             Int       @id @default(autoincrement())
+  quote_id       Int
+  itemable_type  String    @db.VarChar(255)
+  itemable_id    Int
+  family_id      Int?
+  quantity       Int
+  price          Decimal   @db.Decimal(14, 4)
+  is_selected    Boolean
+  available      Boolean   @default(true)
+  offer_type     String?   @db.VarChar(255)
+  offer_value    Decimal?  @db.Decimal(14, 4)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+  unique_item_id String?   @db.VarChar(255)
+
+  @@index([itemable_type, itemable_id], map: "quotes_items_itemable_type_itemable_id_index")
+  @@index([quote_id], map: "quotes_items_quote_id_foreign")
+}
+
+model references {
+  id         Int       @id @default(autoincrement())
+  code       String    @db.VarChar(255)
+  text       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model relationship_order_1 {
+  id             Int       @id @default(autoincrement())
+  supply         String    @db.VarChar(255)
+  related_supply String    @db.VarChar(255)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model relationship_order_2 {
+  id             Int       @id @default(autoincrement())
+  supply         String    @db.VarChar(255)
+  related_supply String    @db.VarChar(255)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model relationship_order_3 {
+  id             Int       @id @default(autoincrement())
+  supply         String    @db.VarChar(255)
+  related_supply String    @db.VarChar(255)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model relationship_order_4 {
+  id             Int       @id @default(autoincrement())
+  supply         String    @db.VarChar(255)
+  related_supply String    @db.VarChar(255)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model relationship_rules {
+  id           Int       @id @default(autoincrement())
+  rule_type    String?   @db.VarChar(255)
+  family_id    String    @db.VarChar(255)
+  attribute_id String    @db.VarChar(255)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model remote_control {
+  id          Int       @id @default(autoincrement())
+  label       String?   @db.VarChar(255)
+  description String?   @db.Text
+  message     String?   @db.Text
+  platform    String    @db.VarChar(255)
+  version     String    @db.VarChar(255)
+  enabled     Boolean
+  must_update Boolean?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model role_has_permissions {
+  permission_id Int
+  role_id       Int
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_has_permissions_role_id_foreign")
+}
+
+model roles {
+  id         Int       @id @default(autoincrement())
+  team_id    Int?
+  name       String    @db.VarChar(255)
+  guard_name String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@unique([team_id, name, guard_name], map: "roles_team_id_name_guard_name_unique")
+  @@index([team_id], map: "roles_team_foreign_key_index")
+}
+
+model rules {
+  id            Int     @id @default(autoincrement())
+  item_id       String  @db.VarChar(255)
+  percentage    Decimal @db.Decimal(14, 4)
+  minimum_value Decimal @db.Decimal(14, 4)
+  discount_id   Int
+
+  @@unique([discount_id, item_id], map: "discount_item_unique")
+}
+
+model santander_payment_methods {
+  id                                  Int       @id @default(autoincrement())
+  created_at                          DateTime? @db.Timestamp(0)
+  updated_at                          DateTime? @db.Timestamp(0)
+  identification_type                 Int?
+  identification_number               Int?
+  gender                              String?   @db.VarChar(255)
+  full_name                           String?   @db.VarChar(255)
+  phone                               String?   @db.VarChar(255)
+  email                               String?   @db.VarChar(255)
+  birth_date                          String?   @db.VarChar(255)
+  cuil                                String?   @db.VarChar(255)
+  is_client                           Boolean?
+  credit_type                         String?   @db.VarChar(255)
+  monthly_income                      String?   @db.VarChar(255)
+  max_income                          String?   @db.VarChar(255)
+  amount                              String?   @db.VarChar(255)
+  article_id                          String?   @db.VarChar(255)
+  first_due_date                      String?   @db.VarChar(255)
+  plan_group_id                       String?   @db.VarChar(255)
+  requested_capital                   String?   @db.VarChar(255)
+  first_expiration_date               String?   @db.VarChar(255)
+  approved_amount                     String?   @db.VarChar(255)
+  minimum_approved_amount             String?   @db.VarChar(255)
+  pending_request_id                  Int?
+  client_id                           String?   @db.VarChar(255)
+  campaign_message                    String?   @db.VarChar(255)
+  article                             Json?
+  biometric_link                      String?   @db.VarChar(255)
+  installment_amount                  String?   @db.VarChar(255)
+  installment_sealed_amount           String?   @db.VarChar(255)
+  installment_number                  String?   @db.VarChar(255)
+  installment_plan_id                 String?   @db.VarChar(255)
+  installment_due_date                String?   @db.VarChar(255)
+  installment_due_days_number         String?   @db.VarChar(255)
+  installment_requested_capital       String?   @db.VarChar(255)
+  installment_plan_description        String?   @db.VarChar(255)
+  installment_percentages             String?   @db.VarChar(255)
+  installment_granting_amount         String?   @db.VarChar(255)
+  installment_initial_granting_amount String?   @db.VarChar(255)
+  route                               String?   @db.VarChar(255)
+  street_number                       String?   @db.VarChar(255)
+  apartment                           String?   @db.VarChar(255)
+  floor                               String?   @db.VarChar(255)
+  postal_code                         String?   @db.VarChar(255)
+  santander_city_id                   Int?
+  referrals                           Json?
+  cuil_1                              Int?
+  cuil_2                              Int?
+  tramit_number                       String?   @db.VarChar(255)
+  legal_address                       String?   @db.VarChar(255)
+  deleted_at                          DateTime? @db.Timestamp(0)
+}
+
+model santander_places {
+  id            Int       @id @default(autoincrement())
+  location_name String    @db.VarChar(180)
+  province_name String    @db.VarChar(180)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+model settings {
+  id                       Int       @id @default(autoincrement())
+  cappLogo                 String    @db.VarChar(255)
+  cappFee                  Decimal   @db.Decimal(7, 6)
+  IVA                      Decimal   @db.Decimal(7, 6)
+  decidir_fee              Decimal   @db.Decimal(7, 6)
+  decidir_site_id          String    @db.VarChar(255)
+  decidir_payment_type     String    @db.VarChar(255)
+  decidir_distributed_type String    @db.VarChar(255)
+  decidir_minimum          Decimal   @db.Decimal(8, 2)
+  decidir_maximum          Decimal   @db.Decimal(8, 2)
+  mercadopago_prodKey      String    @db.VarChar(255)
+  mercadopago_testKey      String    @db.VarChar(255)
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+  pagos360_apikey          String?   @db.VarChar(255)
+  pagos360_id              String?   @db.VarChar(255)
+  pagos360_secret          String?   @db.VarChar(255)
+  quote_limit_for_manual   Int
+}
+
+model shipping_delivery_methods {
+  id                         Int       @id @default(autoincrement())
+  user_shipping_address_id   Int?
+  place_id                   Int?
+  address_route              String?   @db.VarChar(255)
+  address_street_number      String?   @db.VarChar(255)
+  address_extra              String?   @db.VarChar(255)
+  price                      Float?
+  gated_community_additional Float?
+  description                Json?
+  created_at                 DateTime? @db.Timestamp(0)
+  updated_at                 DateTime? @db.Timestamp(0)
+  address_name               String?   @db.VarChar(255)
+
+  @@index([place_id], map: "shipping_delivery_methods_place_id_foreign")
+}
+
+model shipping_order_items {
+  id         Int       @id @default(autoincrement())
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model status_for_bols {
+  created_at DateTime     @default(now()) @db.Timestamp(6)
+  updated_at DateTime     @default(now()) @db.Timestamp(6)
+  id         Int          @id @default(autoincrement()) @db.UnsignedInt
+  text       String       @db.VarChar(255)
+  bol_status bol_status[]
+}
+
+model supplie_task {
+  supplie_id Int
+  task_id    Int
+  created_by Int?
+  updated_by Int?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@id([supplie_id, task_id])
+  @@index([task_id], map: "supplie_task_task_id_foreign")
+}
+
+model supplies {
+  id               Int       @id @default(autoincrement())
+  family_id        Int       @default(1)
+  name             String    @db.VarChar(255)
+  code             String?   @db.VarChar(255)
+  reference        String?   @db.VarChar(255)
+  performance      Float     @default(1.00)
+  performance_unit String?   @db.VarChar(255)
+  state            String    @default("1") @db.VarChar(255)
+  cost             Float?
+  created_by       Int?
+  updated_by       Int?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@index([family_id], map: "supplies_family_id_foreign")
+}
+
+model task_variable {
+  variable_id Int
+  task_id     Int
+  main        Boolean   @default(false)
+  created_by  Int?
+  updated_by  Int?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@id([variable_id, task_id])
+  @@index([task_id], map: "task_variable_task_id_foreign")
+}
+
+model tasks {
+  id         Int       @id @default(autoincrement())
+  item_id    Int?
+  name       String?   @db.VarChar(255)
+  code       String?   @db.VarChar(255)
+  state      Int       @default(1)
+  created_by Int?
+  updated_by Int?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([item_id], map: "tasks_item_id_foreign")
+}
+
+model telescope_entries {
+  sequence                Int                      @id @default(autoincrement())
+  uuid                    String                   @unique(map: "telescope_entries_uuid_unique") @db.Char(36)
+  batch_id                String                   @db.Char(36)
+  family_hash             String?                  @db.VarChar(255)
+  should_display_on_index Boolean                  @default(true)
+  type                    String                   @db.VarChar(20)
+  content                 String                   @db.LongText
+  created_at              DateTime?                @db.DateTime(0)
+  telescope_entries_tags  telescope_entries_tags[] @ignore
+
+  @@index([batch_id], map: "telescope_entries_batch_id_index")
+  @@index([created_at], map: "telescope_entries_created_at_index")
+  @@index([family_hash], map: "telescope_entries_family_hash_index")
+  @@index([type, should_display_on_index], map: "telescope_entries_type_should_display_on_index_index")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model telescope_entries_tags {
+  entry_uuid        String            @db.Char(36)
+  tag               String            @db.VarChar(255)
+  telescope_entries telescope_entries @relation(fields: [entry_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction, map: "telescope_entries_tags_entry_uuid_foreign")
+
+  @@index([entry_uuid, tag], map: "telescope_entries_tags_entry_uuid_tag_index")
+  @@index([tag], map: "telescope_entries_tags_tag_index")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model telescope_monitoring {
+  tag String @db.VarChar(255)
+
+  @@ignore
+}
+
+model units {
+  id         Int       @id @default(autoincrement())
+  key        String?   @db.VarChar(255)
+  code       String    @db.VarChar(25)
+  singular   String    @db.VarChar(25)
+  plural     String    @db.VarChar(25)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model users {
+  id                             Int           @id @default(autoincrement())
+  constructores_id               Int
+  name                           String        @db.VarChar(255)
+  email                          String        @unique(map: "users_email_unique") @db.VarChar(255)
+  email_verified_at              DateTime?     @db.Timestamp(0)
+  password                       String?       @db.VarChar(255)
+  two_factor_secret              String?       @db.Text
+  two_factor_recovery_codes      String?       @db.Text
+  remember_token                 String?       @db.VarChar(100)
+  uid                            String?       @db.VarChar(255)
+  phone_number                   String?       @db.VarChar(255)
+  birthdate                      DateTime?     @db.Date
+  last_name                      String?       @db.VarChar(255)
+  first_name                     String?       @db.VarChar(255)
+  photo                          String?       @db.VarChar(255)
+  country                        String?       @db.VarChar(255)
+  province                       String?       @db.VarChar(255)
+  locality                       String?       @db.VarChar(255)
+  lang_id                        Int?
+  pro_activity_id                Int?
+  gender_id                      Int?
+  merchant_id                    Int?
+  push_ids                       String?       @db.Text
+  duplicates                     String        @default("0") @db.VarChar(255)
+  is_admin                       Boolean       @default(false)
+  is_merchant_superuser          Boolean       @default(false)
+  is_data_entry                  Boolean       @default(false)
+  is_commercial_hunter           Boolean       @default(false)
+  is_commercial_admin            Boolean       @default(false)
+  notification_mail              Boolean       @default(true)
+  notification_database          Boolean       @default(true)
+  notification_onesignal         Boolean       @default(true)
+  state                          Boolean       @default(false)
+  free                           Boolean       @default(false)
+  account_id                     Int?
+  active_account                 Boolean?      @default(true)
+  job                            String?       @db.VarChar(255)
+  location                       String?       @db.VarChar(255)
+  phone                          String?       @db.VarChar(255)
+  geo                            String?       @db.VarChar(255)
+  firebase_email                 String?       @db.VarChar(255)
+  firebase_email_verified        Boolean?
+  firebase_password_hash         String?       @db.VarChar(255)
+  firebase_password_salt         String?       @db.VarChar(255)
+  firebase_name                  String?       @db.VarChar(255)
+  firebase_photo_url             String?       @db.VarChar(255)
+  google_id                      String?       @db.VarChar(255)
+  google_email                   String?       @db.VarChar(255)
+  google_display_name            String?       @db.VarChar(255)
+  google_photo_url               String?       @db.VarChar(255)
+  facebook_id                    String?       @db.VarChar(255)
+  facebook_email                 String?       @db.VarChar(255)
+  facebook_display_name          String?       @db.VarChar(255)
+  facebook_photo_url             String?       @db.VarChar(255)
+  twitter_id                     String?       @db.VarChar(255)
+  twitter_email                  String?       @db.VarChar(255)
+  twitter_display_name           String?       @db.VarChar(255)
+  twitter_photo_url              String?       @db.VarChar(255)
+  github_id                      String?       @db.VarChar(255)
+  github_email                   String?       @db.VarChar(255)
+  github_display_name            String?       @db.VarChar(255)
+  github_photo_url               String?       @db.VarChar(255)
+  incorrect_password             Int?          @db.UnsignedInt
+  created_at                     DateTime?     @db.Timestamp(0)
+  updated_at                     DateTime?     @db.Timestamp(0)
+  deleted_at                     DateTime?     @db.Timestamp(0)
+  merchant_notifications_seen_at DateTime?     @db.Timestamp(0)
+  monitoring_program_id          Int?
+  is_monitoring_admin_user       Boolean
+  last_activity                  DateTime?     @db.Timestamp(0)
+  token_ios                      String?       @db.VarChar(255)
+  default_discount_type          Int           @default(1)
+  billings                       billings?
+  brand_users                    brand_users[]
+  carts                          carts[]
+}
+
+model users_authorizations {
+  user_id          Int
+  authorization_id Int
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@id([user_id, authorization_id])
+  @@index([authorization_id], map: "users_authorizations_authorization_id_foreign")
+}
+
+model users_cards {
+  id                               Int                     @id @default(autoincrement())
+  token                            String?                 @db.VarChar(255)
+  card_number                      String?                 @db.VarChar(255)
+  card_number_length               Int?                    @db.UnsignedInt
+  bin                              String                  @db.VarChar(255)
+  last_four_digits                 String                  @db.VarChar(255)
+  security_code_length             Int?                    @db.UnsignedInt
+  expiration_month                 String                  @db.VarChar(255)
+  expiration_year                  String                  @db.VarChar(255)
+  cardholder_identification_type   String                  @db.VarChar(255)
+  cardholder_identification_number String                  @db.VarChar(255)
+  cardholder_name                  String                  @db.VarChar(255)
+  bank_name                        String?                 @db.VarChar(255)
+  bank_img                         String?                 @db.VarChar(255)
+  expired                          Boolean                 @default(false)
+  user_id                          Int
+  payment_method_id                Int                     @db.UnsignedInt
+  created_at                       DateTime                @default(now()) @db.Timestamp(0)
+  updated_at                       DateTime?               @db.Timestamp(0)
+  decidir_payment_methods          decidir_payment_methods @relation(fields: [payment_method_id], references: [id], map: "users_cards_payment_method_id_foreign")
+
+  @@index([payment_method_id], map: "users_cards_payment_method_id_foreign")
+  @@index([user_id], map: "users_cards_user_id_foreign")
+}
+
+model users_settings {
+  id                  Int       @id @default(autoincrement())
+  web_setting_id      Int
+  settingtemable_type String    @db.VarChar(255)
+  settingtemable_id   Int
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+  user_id             Int
+
+  @@index([settingtemable_type, settingtemable_id], map: "users_settings_settingtemable_type_settingtemable_id_index")
+  @@index([user_id], map: "users_settings_user_id_foreign")
+}
+
+model users_shipping_addresses {
+  id                              Int       @id @default(autoincrement())
+  name_old                        String?   @db.VarChar(255)
+  formatted_address_old           String?   @db.VarChar(255)
+  place_id_old                    String?   @db.VarChar(255)
+  route_old                       String?   @db.VarChar(255)
+  street_number_old               String?   @db.VarChar(255)
+  postal_code_old                 String?   @db.VarChar(255)
+  locality_old                    String?   @db.VarChar(255)
+  country_old                     String?   @db.VarChar(255)
+  administrative_area_level_1_old String?   @db.VarChar(255)
+  administrative_area_level_2_old String?   @db.VarChar(255)
+  latitude_old                    Decimal?  @db.Decimal(11, 7)
+  longitude_old                   Decimal?  @db.Decimal(11, 7)
+  extra                           String?   @db.VarChar(255)
+  user_id                         Int
+  created_at                      DateTime? @db.Timestamp(0)
+  updated_at                      DateTime? @db.Timestamp(0)
+  is_default                      Boolean   @default(false)
+  place_id                        Int?
+  route                           String?   @db.VarChar(255)
+  street_number                   String?   @db.VarChar(255)
+  is_gated_community              Boolean
+
+  @@index([place_id], map: "users_shipping_addresses_place_id_foreign")
+  @@index([user_id], map: "users_shipping_addresses_user_id_foreign")
+}
+
+model variables {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  unit       String?   @db.VarChar(255)
+  options    String?   @db.VarChar(255)
+  x          Boolean   @default(true)
+  y          Boolean   @default(false)
+  z          Boolean   @default(false)
+  state      Int       @default(1)
+  created_by Int?
+  updated_by Int?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model web_settings {
+  id          Int       @id @default(autoincrement())
+  code        String    @db.VarChar(255)
+  description String    @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
