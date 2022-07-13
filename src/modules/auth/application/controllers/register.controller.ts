@@ -14,8 +14,8 @@ export class RegisterController {
     @Throttle(6, 60)
     @Post()
     public async register(@Body() registerInput: RegisterInput, @Response() res){
-        const { name, email, password } = registerInput
-        const token = await this.authService.register({ name, email, password })
-        return res.send({ token })
+        const { first_name, last_name, email, password } = registerInput
+        const token = await this.authService.register({ first_name, last_name, email, password })
+        return res.send(token)
     }
 }

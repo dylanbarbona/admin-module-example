@@ -1,20 +1,17 @@
 import {Inject, Injectable} from '@nestjs/common';
-import {CommandBus, QueryBus} from "@nestjs/cqrs";
-
-import { LoginCommand } from "../../domain/commands/login.command";
-import { RegisterCommand } from "../../domain/commands/register.command";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 
 import { LoginInput } from "../inputs/login.input";
 import { RegisterInput } from "../inputs/register.input";
+
 import { Token } from "../../domain/entities/token.entity";
-import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
-import { PrismaService } from "../../../../database/prisma.service";
-import { randomBytes } from "crypto";
 import { User } from "../../domain/entities/user.entity";
-import {AuthRepository} from "../../domain/contracts/auth.repository";
-import {WhoAmIQuery} from "../../domain/queries/who-am-i.query";
-import {I18n, I18nContext} from "nestjs-i18n";
+
+import { RegisterCommand } from "../../domain/commands/register.command";
+import { WhoAmIQuery } from "../../domain/queries/who-am-i.query";
+import { LoginQuery } from "../../domain/queries/login.query";
+
+import { AuthRepository } from "../../domain/contracts/auth.repository";
 
 @Injectable()
 export class AuthService {
@@ -25,12 +22,12 @@ export class AuthService {
 
     public async login(loginInput: LoginInput): Promise<Token> {
         const { email, password } = loginInput
-        return await this.commandBus.execute(new LoginCommand(email, password))
+        return await this.queryBus.execute(new LoginQuery(email, password))
     }
 
     public async register(registerInput: RegisterInput): Promise<Token> {
-        const { name, email, password } = registerInput
-        return await this.commandBus.execute(new RegisterCommand(name, email, password))
+        const { first_name, last_name, email, password } = registerInput
+        return await this.commandBus.execute(new RegisterCommand(first_name, last_name, email, password))
     }
 
     public async validateUser(user_id: number): Promise<User> {

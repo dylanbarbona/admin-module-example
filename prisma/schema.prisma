@@ -2444,7 +2444,7 @@ model units {
 
 model users {
   id                             Int           @id @default(autoincrement())
-  constructores_id               Int
+  constructores_id               Int?
   name                           String        @db.VarChar(255)
   email                          String        @unique(map: "users_email_unique") @db.VarChar(255)
   email_verified_at              DateTime?     @db.Timestamp(0)
@@ -2511,7 +2511,7 @@ model users {
   deleted_at                     DateTime?     @db.Timestamp(0)
   merchant_notifications_seen_at DateTime?     @db.Timestamp(0)
   monitoring_program_id          Int?
-  is_monitoring_admin_user       Boolean
+  is_monitoring_admin_user       Boolean       @default(false)
   last_activity                  DateTime?     @db.Timestamp(0)
   token_ios                      String?       @db.VarChar(255)
   default_discount_type          Int           @default(1)

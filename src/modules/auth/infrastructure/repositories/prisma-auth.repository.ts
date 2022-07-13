@@ -18,31 +18,24 @@ export class PrismaAuthRepository implements AuthRepository {
         return user
     }
 
-    public async create(name: string, email: string, password: string): Promise<User> {
+    public async create(first_name: string, last_name: string, email: string, password: string): Promise<User> {
         try {
-            return null;
-            // return await this.prisma.users.create({
-            //     data: {
-            //         name,
-            //         email,
-            //         password,
-            //         roles: {
-            //             create: {
-            //                 role: {
-            //                     connect: {
-            //                         name: 'user',
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     }
-            // })
+            return await this.prisma.users.create({
+                data: {
+                    email,
+                    password,
+                    first_name,
+                    last_name,
+                    name: first_name + ' ' + last_name
+                }
+            })
         } catch (error) {
             switch(error.meta.target){
                 case 'users_email_key':
-                    throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
+                case 'users_email_unique':
+                    throw new HttpException('El usuario ya se encuentra registrado', HttpStatus.BAD_REQUEST);
                 default:
-                    throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
+                    throw new HttpException('Error interno en el servidor', HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
     }

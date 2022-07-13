@@ -1,5 +1,5 @@
 export interface AuthRepository {
     findOne(email: string)
     findById(id: number)
-    create(name: string, email: string, password: string)
+    create(first_name: string, last_name: string, email: string, password: string)
 }

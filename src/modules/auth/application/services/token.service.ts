@@ -34,7 +34,7 @@ export class TokenService {
             },
             {
                 algorithm: 'RS256',
-                expiresIn: 60,
+                expiresIn: '1y',
                 jwtid: jti.id,
                 notBefore: '-1s',
                 subject: user_id.toString()

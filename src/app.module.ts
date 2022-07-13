@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
-import { MailModule } from './mail/mail.module';
-import { ModulesModule } from './modules/modules.module';
-import { ConfigurationModule } from "./config/config.module";
-import { ScheduleModule } from "@nestjs/schedule";
+
 import { ThrottlerGuard , ThrottlerModule} from "@nestjs/throttler";
-import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ApolloDriver, ApolloDriverConfig} from "@nestjs/apollo";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ScheduleModule } from "@nestjs/schedule";
 import { GraphQLModule } from "@nestjs/graphql";
 import { APP_GUARD } from "@nestjs/core";
+
+import { ConfigurationModule } from "./config/config.module";
+import { DatabaseModule } from './database/database.module';
+import { ModulesModule } from './modules/modules.module';
+import { MailModule } from './mail/mail.module';
+import { AppService } from './app.service';
+
 import { AppController } from "./app.controller";
-import {I18nModule} from "nestjs-i18n";
-import * as path from "path";
 
 @Module({
   imports: [

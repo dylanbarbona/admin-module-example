@@ -1,9 +1,8 @@
-import { NestFactory } from '@nestjs/core';
+import {NestFactory, repl } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { repl } from '@nestjs/core';
-import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
-import {RequestMethod, ValidationPipe, VersioningType} from "@nestjs/common";
-import {PrismaService} from "./database/prisma.service";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { RequestMethod, ValidationPipe, VersioningType } from "@nestjs/common";
+import { PrismaService } from "./database/prisma.service";
 
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
@@ -35,5 +34,5 @@ const morgan = require('morgan');
   await prismaService.enableShutdownHooks(app)
   await app.listen(process.env.PORT || 3000, () => console.debug('Listening on port ' + (process.env.PORT || 3000)));
 
-  // await repl(AppModule);
+  await repl(AppModule);
 })()

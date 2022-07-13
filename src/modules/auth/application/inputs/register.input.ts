@@ -5,7 +5,11 @@ import { IsEmail, IsNotEmpty } from "class-validator";
 export class RegisterInput {
     @Field({ description: 'Nombre' })
     @IsNotEmpty({ message: 'El nombre es requerido' })
-    name: string;
+    first_name: string;
+
+    @Field({ description: 'Apellido' })
+    @IsNotEmpty({ message: 'El apellido es requerido' })
+    last_name: string;
 
     @Field({ description: 'Correo electrónico' })
     @IsEmail({}, { message: 'El correo electrónico no es válido' })
