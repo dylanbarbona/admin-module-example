@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 
 import { AuthRepository } from "../../domain/contracts/auth.repository";
 import { User } from "../../domain/entities/user.entity";

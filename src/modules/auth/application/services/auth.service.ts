@@ -30,14 +30,14 @@ export class AuthService {
         return await this.commandBus.execute(new RegisterCommand(first_name, last_name, email, password))
     }
 
+    async whoAmI(user) {
+        return await this.queryBus.execute(new WhoAmIQuery(user));
+    }
+
     public async validateUser(user_id: number): Promise<User> {
         const user = await this.authRepository.findById(user_id)
         if (!user)
             return null;
         return user;
-    }
-
-    async whoAmI(user) {
-        return await this.queryBus.execute(new WhoAmIQuery(user));
     }
 }
